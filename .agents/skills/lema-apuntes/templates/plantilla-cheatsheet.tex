@@ -1,0 +1,88 @@
+\documentclass[10pt, landscape, twocolumn]{article}
+
+% --- Librerías Requeridas ---
+\usepackage[margin=0.5in, columnsep=0.4in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[table]{xcolor}
+\usepackage{tabularx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, calc, shapes.geometric, fit, backgrounds}
+\usepackage{enumitem}
+\usepackage{mathpazo} % Tipografía Palatino
+\usepackage{booktabs}
+
+% --- Configuración de Formato ---
+\pagestyle{empty} % Sin números de página
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2pt}
+\raggedbottom
+
+% Ajuste de espacios en ecuaciones
+\AtBeginDocument{
+  \setlength{\abovedisplayskip}{3pt}
+  \setlength{\belowdisplayskip}{3pt}
+  \setlength{\abovedisplayshortskip}{1pt}
+  \setlength{\belowdisplayshortskip}{1pt}
+}
+
+% --- Definición de Colores ---
+\definecolor{themeblue}{RGB}{0, 90, 160}
+\definecolor{themegray}{RGB}{80, 80, 80}
+\definecolor{setblue}{RGB}{240, 244, 255}
+\definecolor{setred}{RGB}{255, 240, 240}
+\definecolor{setborderblue}{RGB}{0, 60, 140}
+\definecolor{setborderred}{RGB}{150, 0, 0}
+
+% --- Comandos Personalizados para Títulos ---
+\newcommand{\cheatsheetsection}[1]{
+    \vspace{0.6em}
+    {\color{themeblue}\large\bfseries #1} \par
+    \vspace{-0.5em}
+    {\color{themeblue}\rule{\linewidth}{1pt}} \par
+    \vspace{0.2em}
+}
+
+\newcommand{\cheatsheetsubsection}[1]{
+    \vspace{0.4em}
+    {\color{themeblue}\normalsize\bfseries #1} \par
+    \vspace{0.1em}
+}
+
+% --- Inicio del Documento ---
+\begin{document}
+
+% --- Cabecera ---
+\begin{center}
+    \vspace{-1em}
+    {\color{themeblue}\huge\bfseries Título del Apunte o Tema}\\[0.1em]
+    {\color{themegray}\small Subtítulo descriptivo o síntesis de los temas cubiertos}\\[0.4em]
+    {\color{themegray}\footnotesize \textbf{Por Roberto León Landeros}}
+\end{center}
+\vspace{-0.8em}
+
+% --- Sección 1 ---
+\cheatsheetsection{1. Fundamentos y Definiciones Formales}
+Texto directo y riguroso. Definir objetos formalmente con $:=$ (por ejemplo, sea $f : \mathbb{R}^n \to \mathbb{R}$ diferenciable tal que $\forall \mathbf{x} \in \Omega$, $\nabla f(\mathbf{x}) := (\partial_{x_1} f, \dots, \partial_{x_n} f)^T$).
+\[ \int_{a}^{b} f(x) \, dx = F(b) - F(a) \]
+
+\cheatsheetsubsection{1.1 Propiedades Estructurales}
+\begin{itemize}[leftmargin=*, nosep]
+    \item \textbf{Concepto Clave 1:} Explicación precisa y concisa desde primeros principios.
+    \item \textbf{Concepto Clave 2:} Condición necesaria y suficiente ($\iff$) o implicación ($\implies$).
+    \item \textbf{Caso Límite / Observación:} Nota técnica sobre estabilidad, complejidad o contraejemplos.
+\end{itemize}
+
+% --- Ejemplo de Tabla ---
+\cheatsheetsection{2. Síntesis Comparativa}
+\vspace{0.2em}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{|p{0.28\linewidth}|X|}
+\hline
+\rowcolor{setblue}
+\textbf{Concepto / Operador} & \textbf{Definición Formal y Aplicación} \\ \hline
+Elemento A & Descripción formal, complejidad o interpretación geométrica. \\ \hline
+Elemento B & Restricciones, invariantes o casos especiales relevantes. \\ \hline
+Fórmula C & $\nabla \cdot \mathbf{B} = 0$ --- Interpretación física o algebraica. \\ \hline
+\end{tabularx}
+
+\end{document}
