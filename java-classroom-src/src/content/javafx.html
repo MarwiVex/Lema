@@ -1,0 +1,539 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-cyan-500/20 text-cyan-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-window-restore"></i></span>
+    JavaFX & Scene Builder: Guía Completa y Práctica
+</h2>
+
+<p class="text-slate-300 mb-8 text-base leading-relaxed">
+    JavaFX es el toolkit moderno para el desarrollo de aplicaciones de escritorio enriquecidas (GUI) en Java. Separa limpiamente el diseño visual declarativo (archivos <code>.fxml</code>) de la lógica de negocio mediante controladores, permitiendo diseñar interfaces de alta calidad usando herramientas visuales como <strong>Scene Builder</strong>.
+</p>
+
+<!-- 1. INTRODUCCIÓN Y ARQUITECTURA -->
+<h3 class="text-2xl font-bold text-cyan-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-layer-group text-cyan-400"></i> 1. Conceptos Fundamentales: Stage, Scene y Nodos
+</h3>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="glass p-5 rounded-xl border-t-4 border-t-cyan-500">
+        <h4 class="font-bold text-cyan-300 mb-2 flex items-center gap-2">
+            <i class="fa-regular fa-window-maximize"></i> Stage (El Escenario)
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Representa la ventana principal del sistema operativo (borde, barra de título, botones de minimizar/cerrar). JavaFX te proporciona el <code>primaryStage</code> en el método <code>start</code>.
+        </p>
+    </div>
+
+    <div class="glass p-5 rounded-xl border-t-4 border-t-blue-500">
+        <h4 class="font-bold text-blue-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-film"></i> Scene (La Escena)
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Es el contenedor de todo el contenido visual dentro del Stage. Un Stage solo muestra una Scene a la vez, pero puedes intercambiar escenas dinámicamente con transiciones o navegación.
+        </p>
+    </div>
+
+    <div class="glass p-5 rounded-xl border-t-4 border-t-emerald-500">
+        <h4 class="font-bold text-emerald-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-cubes"></i> Scene Graph & Nodes
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Árbol jerárquico de elementos visuales (Layouts, Buttons, Labels, ComboBoxes). Todos derivan de <code>Node</code> y componen la vista cargada desde tu archivo FXML.
+        </p>
+    </div>
+</div>
+
+<!-- 2. SCENE BUILDER Y VINCULACIÓN -->
+<h3 class="text-2xl font-bold text-emerald-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-shapes text-emerald-400"></i> 2. Flujo de Trabajo con Scene Builder
+</h3>
+
+<div class="glass p-6 rounded-xl border border-white/10 mb-8 space-y-4">
+    <p class="text-slate-300 text-sm leading-relaxed">
+        <strong>Gluon Scene Builder</strong> es el diseñador visual drag-and-drop de JavaFX. Para conectar lo que arrastras en pantalla con tu código Java, existen tres pilares:
+    </p>
+    <ul class="list-disc list-inside text-xs text-slate-300 space-y-2">
+        <li><strong class="text-emerald-400">Asignar el Controller:</strong> En el panel inferior izquierdo (<em>Document &gt; Controller</em>), escribe la clase controladora con su paquete completo (ej. <code>com.ejemplo.controllers.CalculadoraController</code>).</li>
+        <li><strong class="text-emerald-400">Identificar Componentes (fx:id):</strong> En el panel derecho (<em>Code &gt; fx:id</em>), dale un identificador a cada control que quieras manipular desde Java (ej. <code>txtPantalla</code>, <code>lblEstado</code>, <code>btnSumar</code>). Debe coincidir exactamente con el nombre de la variable anotada con <code>@FXML</code>.</li>
+        <li><strong class="text-emerald-400">Event Handlers (On Action):</strong> En el panel derecho (<em>Code &gt; On Action</em>), escribe el nombre del método manejador con una almohadilla inicial (ej. <code>#onDigitoClick</code> o <code>#onOperacionClick</code>).</li>
+    </ul>
+</div>
+
+<!-- 3. COMPONENTES BÁSICOS: BUTTON, LABEL, TEXTFIELD Y ACTIONEVENT -->
+<h3 class="text-2xl font-bold text-sky-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-square-check text-sky-400"></i> 3. Componentes Básicos, Métodos Esenciales y <code>ActionEvent</code>
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    En JavaFX, casi todos los controles de texto descienden de <code>Labeled</code> o <code>TextInputControl</code>. Dominar sus métodos fundamentales es clave antes de construir pantallas complejas:
+</p>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="glass p-5 rounded-xl border border-sky-500/30">
+        <h4 class="font-bold text-sky-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-tag text-sky-400"></i> Label
+        </h4>
+        <p class="text-xs text-slate-400 mb-3">Texto estático o dinámico para mostrar información al usuario.</p>
+        <div class="bg-black/50 p-3 rounded-lg font-mono text-[11px] text-slate-200 space-y-1">
+            <div><span class="text-sky-400">lblMensaje</span>.setText(<span class="text-emerald-300">"Total: $500"</span>);</div>
+            <div>String txt = <span class="text-sky-400">lblMensaje</span>.getText();</div>
+            <div><span class="text-sky-400">lblMensaje</span>.setVisible(<span class="text-amber-300">false</span>);</div>
+        </div>
+    </div>
+
+    <div class="glass p-5 rounded-xl border border-emerald-500/30">
+        <h4 class="font-bold text-emerald-300 mb-2 flex items-center gap-2">
+            <i class="fa-regular fa-keyboard text-emerald-400"></i> TextField
+        </h4>
+        <p class="text-xs text-slate-400 mb-3">Caja de entrada de una sola línea editable por el usuario.</p>
+        <div class="bg-black/50 p-3 rounded-lg font-mono text-[11px] text-slate-200 space-y-1">
+            <div>String entrada = <span class="text-emerald-400">txtNombre</span>.getText();</div>
+            <div><span class="text-emerald-400">txtNombre</span>.setText(<span class="text-emerald-300">""</span>);</div>
+            <div><span class="text-emerald-400">txtNombre</span>.setPromptText(<span class="text-emerald-300">"Ingresa..."</span>);</div>
+            <div><span class="text-emerald-400">txtNombre</span>.setEditable(<span class="text-amber-300">false</span>);</div>
+        </div>
+    </div>
+
+    <div class="glass p-5 rounded-xl border border-purple-500/30">
+        <h4 class="font-bold text-purple-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-computer-mouse text-purple-400"></i> Button & ActionEvent
+        </h4>
+        <p class="text-xs text-slate-400 mb-3">Dispara eventos al hacer clic o presionar Enter.</p>
+        <div class="bg-black/50 p-3 rounded-lg font-mono text-[11px] text-slate-200 space-y-1">
+            <div><span class="text-purple-400">btnCalcular</span>.setDisable(<span class="text-amber-300">true</span>);</div>
+            <div><span class="text-purple-400">btnCalcular</span>.setText(<span class="text-emerald-300">"Guardando..."</span>);</div>
+            <div>Button b = (Button) event.getSource();</div>
+            <div>String textoBtn = b.getText();</div>
+        </div>
+    </div>
+</div>
+
+<div class="glass p-6 rounded-xl border-l-4 border-l-sky-500 mb-8">
+    <h4 class="font-bold text-sky-300 mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-bolt text-sky-400"></i> ¿Qué es <code>ActionEvent</code> y para qué sirve?
+    </h4>
+    <p class="text-xs text-slate-300 leading-relaxed mb-3">
+        Cuando un usuario hace clic en un botón, JavaFX crea un objeto <code>ActionEvent</code>. Mediante <code>event.getSource()</code> puedes saber <strong>exactamente qué botón fue presionado</strong>. Esto es sumamente útil porque te permite conectar <strong>muchos botones distintos al mismo método manejador</strong> sin tener que crear un método por cada botón.
+    </p>
+    <div class="bg-black/60 p-3 rounded-lg font-mono text-xs text-slate-200">
+        <span class="text-sky-400">@FXML</span><br>
+        <span class="text-purple-400">private void</span> <span class="text-blue-300">onBotonPresionado</span>(ActionEvent event) {<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;Button boton = (Button) event.getSource(); <span class="text-slate-500">// Obtenemos el botón origen</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;String texto = boton.getText(); <span class="text-slate-500">// Obtenemos su etiqueta ("1", "2", "+", etc.)</span><br>
+        }
+    </div>
+</div>
+
+<!-- 4. EJEMPLO COMPLETO: CALCULADORA BÁSICA (BUFFER, STRING Y PARSEO) -->
+<h3 class="text-2xl font-bold text-amber-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-calculator text-amber-400"></i> 4. Ejemplo Práctico: Calculadora con <code>StringBuilder</code> y <code>ActionEvent</code>
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    A continuación se muestra un ejemplo clásico y completo de una <strong>calculadora</strong>. Observa cómo usamos <code>StringBuilder</code> como buffer para concatenar los dígitos conforme el usuario pulsa botones, luego parseamos a números (<code>Double.parseDouble</code>) al realizar operaciones y actualizamos el <code>TextField</code> de salida:
+</p>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-amber-500/20 text-amber-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-amber-300 text-sm"></i> CalculadoraController.java
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+
+public class CalculadoraController {
+
+    // Controles vinculados con fx:id desde Scene Builder
+    @FXML private TextField txtPantalla;
+    @FXML private Label lblOperacionPrevia;
+
+    // Buffer en memoria para acumular los caracteres del número actual
+    private StringBuilder bufferActual = new StringBuilder();
+    private double primerOperando = 0.0;
+    private String operador = "";
+    private boolean inicioNuevoNumero = true;
+
+    /**
+     * UN SOLO MÉTODO PARA TODOS LOS DÍGITOS (0 al 9 y punto decimal).
+     * En Scene Builder, asigna #onDigitoClick al "On Action" de todos los botones numéricos.
+     */
+    @FXML
+    private void onDigitoClick(ActionEvent event) {
+        Button btnPresionado = (Button) event.getSource();
+        String digito = btnPresionado.getText();
+
+        // Evitar múltiples puntos decimales
+        if (digito.equals(".") && bufferActual.toString().contains(".")) {
+            return;
+        }
+
+        if (inicioNuevoNumero) {
+            bufferActual.setLength(0); // Limpiar buffer si empezamos un nuevo número
+            inicioNuevoNumero = false;
+        }
+
+        // Concatenamos el dígito al buffer
+        bufferActual.append(digito);
+        
+        // Reflejamos en la pantalla de texto
+        txtPantalla.setText(bufferActual.toString());
+    }
+
+    /**
+     * Maneja los operadores (+, -, *, /)
+     */
+    @FXML
+    private void onOperacionClick(ActionEvent event) {
+        if (bufferActual.length() == 0 && txtPantalla.getText().isEmpty()) return;
+
+        Button btnOp = (Button) event.getSource();
+        operador = btnOp.getText();
+
+        // Convertimos el String del buffer a double para operar
+        primerOperando = Double.parseDouble(txtPantalla.getText());
+        lblOperacionPrevia.setText(primerOperando + " " + operador);
+        inicioNuevoNumero = true;
+    }
+
+    /**
+     * Calcula el resultado final al pulsar '='
+     */
+    @FXML
+    private void onIgualClick(ActionEvent event) {
+        if (operador.isEmpty() || bufferActual.length() == 0) return;
+
+        double segundoOperando = Double.parseDouble(bufferActual.toString());
+        double resultado = 0.0;
+
+        switch (operador) {
+            case "+": resultado = primerOperando + segundoOperando; break;
+            case "-": resultado = primerOperando - segundoOperando; break;
+            case "*": resultado = primerOperando * segundoOperando; break;
+            case "/": 
+                if (segundoOperando == 0) {
+                    txtPantalla.setText("Error: Div 0");
+                    lblOperacionPrevia.setText("");
+                    bufferActual.setLength(0);
+                    inicioNuevoNumero = true;
+                    return;
+                }
+                resultado = primerOperando / segundoOperando; 
+                break;
+        }
+
+        // Convertimos el resultado numérico a String para la UI
+        txtPantalla.setText(String.valueOf(resultado));
+        lblOperacionPrevia.setText(primerOperando + " " + operador + " " + segundoOperando + " =");
+
+        // Preparamos para continuar operando con el resultado
+        bufferActual.setLength(0);
+        bufferActual.append(resultado);
+        operador = "";
+        inicioNuevoNumero = true;
+    }
+
+    /**
+     * Limpia la pantalla y resetea el estado (Botón C)
+     */
+    @FXML
+    private void onLimpiarClick(ActionEvent event) {
+        bufferActual.setLength(0);
+        primerOperando = 0.0;
+        operador = "";
+        txtPantalla.setText("0");
+        lblOperacionPrevia.setText("");
+        inicioNuevoNumero = true;
+    }
+}</code></pre>
+</div>
+
+<!-- 5. INICIALIZABLE VS CONSTRUCTOR -->
+<h3 class="text-2xl font-bold text-rose-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-code-compare text-rose-400"></i> 5. <code>Initializable</code> vs Constructor: Diferencias Clave
+</h3>
+
+<div class="glass p-6 rounded-xl border-l-4 border-l-rose-500 mb-6">
+    <h4 class="font-bold text-rose-400 mb-2">¡Cuidado con el <code>NullPointerException</code>!</h4>
+    <p class="text-xs text-slate-300 leading-relaxed">
+        Cuando <code>FXMLLoader</code> procesa un archivo FXML, primero ejecuta el <strong>Constructor</strong> de la clase controladora. En este momento exacto, las variables con la anotación <code>@FXML</code> aún <strong>son <code>null</code></strong> porque el archivo FXML todavía no ha inyectado los nodos en las variables. Por eso, <strong>NUNCA</strong> intentes hacer cosas como <code>txtPantalla.setText()</code> o <code>cmbItems.setItems()</code> en el constructor.
+    </p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="glass p-5 rounded-xl border border-rose-500/30">
+        <h4 class="font-bold text-rose-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-ban text-rose-400"></i> En el Constructor
+        </h4>
+        <ul class="text-xs text-slate-300 space-y-2 list-disc list-inside">
+            <li>Los campos <code>@FXML</code> son <code>null</code>.</li>
+            <li>No accedas a botones, tablas o combos aquí (lanzará NullPointerException).</li>
+            <li>Úsalo solo para instanciar estructuras puras de Java (ej. inicializar un ArrayList o inyección de dependencias).</li>
+        </ul>
+    </div>
+    <div class="glass p-5 rounded-xl border border-emerald-500/30">
+        <h4 class="font-bold text-emerald-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-400"></i> En <code>initialize()</code>
+        </h4>
+        <ul class="text-xs text-slate-300 space-y-2 list-disc list-inside">
+            <li>Todos los campos <code>@FXML</code> ya están enlazados e inyectados.</li>
+            <li>Es el lugar idóneo para llenar <strong>ComboBox</strong>, configurar <strong>TableView</strong> y añadir listeners.</li>
+            <li>Se ejecuta automáticamente de forma garantizada tras cargar la vista.</li>
+        </ul>
+    </div>
+</div>
+
+<!-- 6. EJEMPLO COMBOBOX & INITIALIZABLE -->
+<h3 class="text-2xl font-bold text-purple-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-list-check text-purple-400"></i> 6. Uso de <code>Initializable</code> con ComboBox y Objetos Personalizados
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Para poblar un <code>ComboBox</code> con objetos complejos (no solo Strings simples) y controlar exactamente qué propiedad se muestra sin depender únicamente del método <code>toString()</code>, utilizamos <code>setCellFactory</code> y <code>setButtonCell</code> dentro de <code>initialize</code>:
+</p>
+
+<!-- Modelo de Datos -->
+<div class="code-wrapper relative pt-6 mb-6">
+    <div class="absolute top-0 left-0 bg-blue-500/20 text-blue-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-blue-300 text-sm"></i> Categoria.java (Modelo)
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">public class Categoria {
+    private int id;
+    private String nombre;
+
+    public Categoria(int id, String nombre) {
+        this.id = id;
+        this.nombre = nombre;
+    }
+
+    public int getId() { return id; }
+    public String getNombre() { return nombre; }
+
+    @Override
+    public String toString() {
+        return nombre; // Respaldo básico
+    }
+}</code></pre>
+</div>
+
+<!-- Controlador con Initializable -->
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-purple-500/20 text-purple-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-purple-300 text-sm"></i> FormularioController.java
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import java.net.URL;
+import java.util.ResourceBundle;
+
+public class FormularioController implements Initializable {
+
+    @FXML private ComboBox<Categoria> cmbCategorias;
+    @FXML private Label lblSeleccion;
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        // 1. Crear la lista observable de elementos
+        ObservableList<Categoria> categorias = FXCollections.observableArrayList(
+            new Categoria(1, "Tecnología y Gadgets"),
+            new Categoria(2, "Libros y Educación"),
+            new Categoria(3, "Hogar y Muebles")
+        );
+
+        // 2. Asignar los elementos al ComboBox
+        cmbCategorias.setItems(categorias);
+
+        // 3. Personalizar cómo se ven los ítems en el menú desplegable (CellFactory)
+        cmbCategorias.setCellFactory(param -> new ListCell<Categoria>() {
+            @Override
+            protected void updateItem(Categoria item, boolean empty) {
+                super.updateItem(item, empty);
+                setText((empty || item == null) ? null : item.getId() + " - " + item.getNombre());
+            }
+        });
+
+        // 4. Personalizar cómo se muestra el ítem seleccionado en el botón cerrado
+        cmbCategorias.setButtonCell(new ListCell<Categoria>() {
+            @Override
+            protected void updateItem(Categoria item, boolean empty) {
+                super.updateItem(item, empty);
+                setText((empty || item == null) ? null : item.getNombre());
+            }
+        });
+
+        // 5. Escuchar cambios de selección
+        cmbCategorias.getSelectionModel().selectedItemProperty().addListener((obs, anterior, seleccionado) -> {
+            if (seleccionado != null) {
+                lblSeleccion.setText("Elegiste: " + seleccionado.getNombre() + " (ID: " + seleccionado.getId() + ")");
+            }
+        });
+    }
+}</code></pre>
+</div>
+
+<!-- 7. LANZADORES Y MULTIPANTALLA -->
+<h3 class="text-2xl font-bold text-blue-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-arrows-split-up-and-left text-blue-400"></i> 7. Gestión de Múltiples Escenas y Ventanas (Launchers)
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    En aplicaciones del mundo real existen dos patrones principales para la navegación:
+</p>
+
+<!-- Patrón 1: Cambiar Escena en la Misma Ventana -->
+<div class="glass p-6 rounded-xl border border-blue-500/20 mb-6">
+    <h4 class="font-bold text-blue-300 mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-arrow-right-arrow-left"></i> Opción A: Cambiar Escena en la Misma Ventana
+    </h4>
+    <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+        Consiste en reemplazar el <code>Scene</code> actual del <code>primaryStage</code> por uno nuevo.
+    </p>
+
+    <div class="code-wrapper relative pt-6 mb-2">
+        <div class="absolute top-0 left-0 bg-blue-500/20 text-blue-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-brands fa-java text-blue-300 text-sm"></i> NavegacionController.java
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import java.io.IOException;
+
+public class MenuController {
+
+    @FXML
+    private void onIrADetalle(ActionEvent event) {
+        try {
+            // Cargar el nuevo FXML
+            Parent root = FXMLLoader.load(getClass().getResource("/vistas/DetalleView.fxml"));
+            
+            // Obtener el Stage actual desde el evento del botón
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            
+            // Reemplazar la escena actual
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+    </div>
+</div>
+
+<!-- Patrón 2: Abrir Nueva Ventana / Modal -->
+<div class="glass p-6 rounded-xl border border-emerald-500/20 mb-8">
+    <h4 class="font-bold text-emerald-300 mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-window-restore"></i> Opción B: Lanzar una Nueva Ventana (Modal o Secundaria)
+    </h4>
+    <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+        Crea un nuevo objeto <code>Stage</code>. Usando <code>initModality(Modality.APPLICATION_MODAL)</code> bloqueas la ventana padre hasta que el usuario cierre el diálogo emergente.
+    </p>
+
+    <div class="code-wrapper relative pt-6 mb-2">
+        <div class="absolute top-0 left-0 bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-brands fa-java text-emerald-300 text-sm"></i> LanzadorModal.java
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import java.io.IOException;
+
+public class LauncherHelper {
+
+    public static void abrirVentanaModal(String rutaFxml, String titulo, Stage ownerStage) {
+        try {
+            FXMLLoader loader = new FXMLLoader(LauncherHelper.class.getResource(rutaFxml));
+            Parent root = loader.load();
+
+            Stage modalStage = new Stage();
+            modalStage.setTitle(titulo);
+            modalStage.setScene(new Scene(root));
+            
+            // Configurar como ventana modal dependiente del padre
+            modalStage.initModality(Modality.WINDOW_MODAL);
+            modalStage.initOwner(ownerStage);
+            modalStage.setResizable(false);
+            
+            modalStage.showAndWait(); // Espera a que se cierre
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+    </div>
+</div>
+
+<!-- 8. CLASE PRINCIPAL APPLICATION -->
+<h3 class="text-2xl font-bold text-cyan-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-rocket text-cyan-400"></i> 8. Clase Principal: <code>Application</code> y Método <code>start()</code>
+</h3>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-cyan-500/20 text-cyan-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-cyan-300 text-sm"></i> App.java (Entry Point)
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+public class App extends Application {
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        // Carga la vista principal diseñada en Scene Builder
+        Parent root = FXMLLoader.load(getClass().getResource("/vistas/MainView.fxml"));
+        
+        Scene scene = new Scene(root);
+        primaryStage.setTitle("Sistema JavaFX Profesional");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args); // Lanza el ciclo de vida JavaFX
+    }
+}</code></pre>
+</div>
+
+<!-- 9. RESUMEN Y CHECKLIST -->
+<div class="glass p-6 rounded-xl border border-white/10 mt-10">
+    <h4 class="font-bold text-white mb-3 flex items-center gap-2">
+        <i class="fa-solid fa-clipboard-check text-cyan-400"></i> Checklist Rápido para Evitar Errores Comunes
+    </h4>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-300">
+        <div class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+            <span><strong>fx:id repetido o ausente:</strong> Asegúrate de que el fx:id en Scene Builder coincida exactamente con el nombre de la variable anotada con <code>@FXML</code> en Java.</span>
+        </div>
+        <div class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+            <span><strong>Ruta del FXML:</strong> Comprueba siempre que el archivo FXML esté dentro del directorio de recursos (ej: <code>src/main/resources/</code>).</span>
+        </div>
+        <div class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+            <span><strong>Visibilidad de @FXML:</strong> Los campos y métodos pueden ser <code>private</code> siempre que lleven la anotación <code>@FXML</code>.</span>
+        </div>
+        <div class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+            <span><strong>Platform.runLater():</strong> Si actualizas componentes visuales desde hilos secundarios o tareas en segundo plano, siempre envuélvelo en <code>Platform.runLater(() -&gt; { ... })</code>.</span>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,361 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-indigo-500/20 text-indigo-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-table-columns"></i></span>
+    15. JavaFX Avanzado: TableView, Alertas y UI Dinámica
+</h2>
+
+<p class="text-slate-300 mb-8 text-base leading-relaxed">
+    Al construir sistemas completos como <strong>BlockBusterUIX</strong> o el gestor de <strong>Café (BaseDatos)</strong>, necesitamos ir más allá de botones y cajas de texto simples. En esta sección aprenderás a mostrar colecciones y jerarquías de herencia en un <code>TableView</code>, capturar números con <code>Spinner</code>, mostrar diálogos con <code>Alert</code>, alternar paneles dinámicos y compartir datos entre ventanas con el patrón <strong>Singleton</strong>.
+</p>
+
+<!-- 1. TABLEVIEW CON PROPERTYVALUEFACTORY -->
+<h3 class="text-2xl font-bold text-indigo-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-table text-indigo-400"></i> 1. <code>TableView</code> Estándar con <code>PropertyValueFactory</code>
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Un <code>TableView&lt;T&gt;</code> muestra una lista de objetos en filas y columnas. La forma más directa de enlazar cada columna (<code>TableColumn</code>) con un atributo de tu clase POJO es mediante <code>PropertyValueFactory&lt;&gt;("nombreAtributo")</code>, que utiliza reflexión internamente para buscar el método getter correspondiente (por ejemplo, <code>getSigla()</code> o <code>getNombre()</code>).
+</p>
+
+<div class="glass p-5 rounded-xl border-l-4 border-l-amber-500 mb-6">
+    <h4 class="font-bold text-amber-300 mb-1 flex items-center gap-2">
+        <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> Regla Crítica en <code>module-info.java</code> para Tablas
+    </h4>
+    <p class="text-xs text-slate-300 leading-relaxed">
+        Para que <code>PropertyValueFactory</code> pueda leer los getters de tus objetos por reflexión sin lanzar un <code>IllegalAccessException</code> o dejar las celdas en blanco, <strong>debes abrir el paquete de tus modelos/controladores a <code>javafx.base</code></strong> dentro de tu archivo <code>module-info.java</code>:
+    </p>
+    <div class="bg-black/60 p-3 rounded-lg font-mono text-xs text-emerald-300 mt-2">
+        opens com.example.basedatos.POJO;<br>
+        opens controlador to javafx.fxml, javafx.base;
+    </div>
+</div>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-indigo-500/20 text-indigo-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-indigo-300 text-sm"></i> TablaControler.java y Carrera.java (Proyecto BlockBusterUIX)
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">package controlador;
+
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
+import java.net.URL;
+import java.util.LinkedList;
+import java.util.ResourceBundle;
+
+public class TablaControler implements Initializable {
+
+    @FXML private TableView<Carrera> tablaCarrera;
+    @FXML private ComboBox<Carrera> comboCarrera;
+    @FXML private Label carreraSeleccionada;
+
+    private LinkedList<Carrera> listaCarreras = new LinkedList<>();
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        listaCarreras.add(new Carrera("LSIA", "Licenciatura en Sistemas de Información Administrativa"));
+        listaCarreras.add(new Carrera("LART", "Licenciatura en Artes"));
+        listaCarreras.add(new Carrera("LCC", "Licenciatura en Ciencias de la Computación"));
+        listaCarreras.add(new Carrera("LISC", "Ingeniería en Sistemas Computacionales"));
+
+        // 1. Definir las columnas y vincularlas con el nombre del atributo (busca getSigla() y getNombre())
+        TableColumn<Carrera, String> tcSigla = new TableColumn<>("Siglas");
+        tcSigla.setCellValueFactory(new PropertyValueFactory<>("sigla"));
+
+        TableColumn<Carrera, String> tcNombre = new TableColumn<>("Nombre");
+        tcNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
+
+        // 2. Asignar las columnas al TableView
+        tablaCarrera.getColumns().setAll(tcSigla, tcNombre);
+
+        // 3. Cargar los objetos de la LinkedList en la tabla y el ComboBox
+        tablaCarrera.getItems().addAll(listaCarreras);
+        comboCarrera.getItems().addAll(listaCarreras);
+    }
+
+    // Evento asignado en Scene Builder -> TableView -> On Mouse Clicked: #clicCarrera
+    @FXML
+    public void clicCarrera(MouseEvent mouseEvent) {
+        Carrera carrera = tablaCarrera.getSelectionModel().getSelectedItem();
+        if (carrera != null) {
+            comboCarrera.setValue(carrera); // Sincroniza el ComboBox con la fila clicada
+            carreraSeleccionada.setText("Seleccionado: " + carrera.toString());
+        }
+    }
+
+    @FXML
+    public void clicLimpiar() {
+        tablaCarrera.getSelectionModel().clearSelection();
+        comboCarrera.getSelectionModel().clearSelection();
+        comboCarrera.setValue(null);
+        carreraSeleccionada.setText("");
+    }
+}</code></pre>
+</div>
+
+<!-- 2. TABLEVIEW POLIMÓRFICO CON CALLBACK E INSTANCEOF -->
+<h3 class="text-2xl font-bold text-purple-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-sitemap text-purple-400"></i> 2. <code>TableView</code> Polimórfico con <code>Callback</code> y <code>SimpleStringProperty</code>
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    ¿Qué sucede cuando tu lista almacena una clase padre abstracta (como <code>LinkedList&lt;Producto&gt;</code> en <strong>BlockBusterUIX</strong>) que contiene subclases distintas (<code>Juguete</code>, <code>ProductoDigital</code>, <code>Videojuego</code>, <code>Pelicula</code>)? Si usas <code>PropertyValueFactory</code> para una columna como <em>"Plataforma"</em> (que solo existe en <code>Videojuego</code>), fallará en las filas que sean <code>Juguete</code> o <code>Pelicula</code>.
+</p>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    La solución empleada en <code>VerInventarioControlador.java</code> consiste en usar un <code>Callback</code> con <code>SimpleStringProperty</code> y verificar el tipo real de cada fila usando <code>instanceof</code>. Si el producto pertenece a esa subclase, hacemos downcasting y extraemos el dato; si no, mostramos un guion <code>"-"</code>:
+</p>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-purple-500/20 text-purple-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-purple-300 text-sm"></i> VerInventarioControlador.java (Proyecto BlockBusterUIX)
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">package controlador;
+
+import CodigoClases.almacen.Almacen;
+import CodigoClases.modelo.*;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.input.MouseEvent;
+import javafx.util.Callback;
+import java.net.URL;
+import java.util.ResourceBundle;
+
+public class VerInventarioControlador implements Initializable {
+    @FXML private TableView<Producto> tablaProductos;
+    @FXML private Label labelProducto;
+
+    private Almacen BlockBuster = Almacen.getInstance();
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        // Columna común de la superclase Producto
+        TableColumn<Producto, String> tcsku = new TableColumn<>("SKU");
+        tcsku.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Producto, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<Producto, String> param) {
+                Producto objetoProducto = param.getValue();
+                return new SimpleStringProperty(objetoProducto.getSKU());
+            }
+        });
+
+        // Columna exclusiva de la subclase Juguete
+        TableColumn<Producto, String> tcmarca = new TableColumn<>("Marca");
+        tcmarca.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Producto, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<Producto, String> param) {
+                Producto objetoProducto = param.getValue();
+                if (objetoProducto instanceof Juguete) {
+                    Juguete objetoJuguete = (Juguete) objetoProducto;
+                    return new SimpleStringProperty(objetoJuguete.getMarca());
+                }
+                return new SimpleStringProperty("-"); // No aplica para Películas o Videojuegos
+            }
+        });
+
+        // Columna de la subclase intermedia ProductoDigital (aplica a Pelicula y Videojuego)
+        TableColumn<Producto, String> tctitulo = new TableColumn<>("Título");
+        tctitulo.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Producto, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<Producto, String> param) {
+                Producto objetoProducto = param.getValue();
+                if (objetoProducto instanceof ProductoDigital) {
+                    ProductoDigital pd = (ProductoDigital) objetoProducto;
+                    return new SimpleStringProperty(pd.getTitulo());
+                }
+                return new SimpleStringProperty("-");
+            }
+        });
+
+        // Columna exclusiva de Videojuego
+        TableColumn<Producto, String> tcplataforma = new TableColumn<>("Plataforma");
+        tcplataforma.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Producto, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<Producto, String> param) {
+                Producto objetoProducto = param.getValue();
+                if (objetoProducto instanceof Videojuego) {
+                    return new SimpleStringProperty(((Videojuego) objetoProducto).getPlataforma());
+                }
+                return new SimpleStringProperty("-");
+            }
+        });
+
+        // Columna exclusiva de Pelicula
+        TableColumn<Producto, String> tcduracion = new TableColumn<>("Duración");
+        tcduracion.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Producto, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<Producto, String> param) {
+                Producto objetoProducto = param.getValue();
+                if (objetoProducto instanceof Pelicula) {
+                    return new SimpleStringProperty(String.valueOf(((Pelicula) objetoProducto).getDuracion()));
+                }
+                return new SimpleStringProperty("-");
+            }
+        });
+
+        tablaProductos.getColumns().addAll(tcsku, tcmarca, tctitulo, tcplataforma, tcduracion);
+        tablaProductos.getItems().addAll(BlockBuster.getInventario());
+    }
+
+    @FXML
+    public void cliclProducto(MouseEvent mouseEvent) {
+        Producto producto = tablaProductos.getSelectionModel().getSelectedItem();
+        if (producto != null) {
+            labelProducto.setText(producto.lineaTexto("|"));
+        }
+    }
+}</code></pre>
+</div>
+
+<!-- 3. PANELES DINÁMICOS, SPINNER, VARARGS Y ALERTAS -->
+<h3 class="text-2xl font-bold text-emerald-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-sliders text-emerald-400"></i> 3. Paneles Dinámicos, <code>Spinner</code>, <code>Alert</code> y Validación con Varargs
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    En <code>AgregarProductoControlador.java</code> (<strong>BlockBusterUIX</strong>) se combinan cuatro técnicas esenciales para formularios profesionales:
+</p>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="glass p-5 rounded-xl border-t-4 border-t-emerald-500">
+        <h4 class="font-bold text-emerald-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-eye-slash"></i> 1. Paneles Dinámicos en un <code>StackPane</code>
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Se colocan varios <code>GridPane</code> (<code>panelJuguetes</code>, <code>panelVideojuegos</code>, <code>panelPeliculas</code>) dentro de un <code>StackPane</code>. Para ocultarlos completamente y que no ocupen espacio en el layout, se invoca tanto <code>setVisible(false)</code> como <code>setManaged(false)</code>.
+        </p>
+    </div>
+
+    <div class="glass p-5 rounded-xl border-t-4 border-t-cyan-500">
+        <h4 class="font-bold text-cyan-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-arrow-up-9-1"></i> 2. Controles Numéricos <code>Spinner&lt;Integer&gt;</code>
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Un <code>Spinner</code> no funciona hasta que le asignas su fábrica de valores en <code>initialize()</code> mediante:<br>
+            <code>new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, valorInicial)</code>.
+        </p>
+    </div>
+
+    <div class="glass p-5 rounded-xl border-t-4 border-t-amber-500">
+        <h4 class="font-bold text-amber-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-bell"></i> 3. Ventanas de Alerta (<code>Alert</code>)
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Reemplazan a <code>System.out.println</code> en interfaces gráficas. Soportan tipos como <code>AlertType.INFORMATION</code>, <code>WARNING</code>, <code>ERROR</code> y <code>CONFIRMATION</code>. Con <code>showAndWait()</code> pausan el flujo hasta que el usuario pulsa <code>ButtonType.OK</code>.
+        </p>
+    </div>
+
+    <div class="glass p-5 rounded-xl border-t-4 border-t-pink-500">
+        <h4 class="font-bold text-pink-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-ellipsis"></i> 4. Validación Limpia con Varargs (<code>TextField...</code>)
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            El método <code>camposEstanLlenos(TextField... campos)</code> recibe cualquier cantidad de <code>TextField</code> separados por comas y verifica en un solo bucle que ninguno esté vacío.
+        </p>
+    </div>
+</div>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-emerald-300 text-sm"></i> AgregarProductoControlador.java (Fragmento Clave)
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">@Override
+public void initialize(URL location, ResourceBundle resources) {
+    comboTipoProductos.getItems().setAll(listaOpcionesTipo);
+    ocultarPaneles();
+
+    // Configurar rangos (mínimo, máximo, valor inicial) de cada Spinner
+    edicionJuguete.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1));
+    anioVideojuego.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1900, 3000, 2026));
+    anioPelicula.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1900, 3000, 2026));
+    duracionPelicula.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 500, 120));
+}
+
+public void ocultarPaneles() {
+    panelJuguetes.setVisible(false);
+    panelJuguetes.setManaged(false);
+    panelVideojuegos.setVisible(false);
+    panelVideojuegos.setManaged(false);
+    panelPeliculas.setVisible(false);
+    panelPeliculas.setManaged(false);
+}
+
+// Validación reutilizable con argumentos variables (Varargs)
+private boolean camposEstanLlenos(TextField... campos) {
+    for (TextField campo : campos) {
+        if (campo.getText() == null || campo.getText().trim().isEmpty()) {
+            Alert alertaError = new Alert(Alert.AlertType.WARNING);
+            alertaError.setTitle("Campos incompletos");
+            alertaError.setHeaderText("No se pudo agregar el producto");
+            alertaError.setContentText("Completa todos los campos requeridos.");
+            alertaError.showAndWait();
+            return false;
+        }
+    }
+    return true;
+}
+
+// Cerrar la ventana modal actual al confirmar el Alert
+private void cerrarVentana() {
+    Stage stage = (Stage) comboTipoProductos.getScene().getWindow();
+    stage.close();
+}</code></pre>
+</div>
+
+<!-- 4. COMPARTIR ESTADO ENTRE VENTANAS CON SINGLETON -->
+<h3 class="text-2xl font-bold text-cyan-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-share-nodes text-cyan-400"></i> 4. Compartir Datos entre Controladores con el Patrón Singleton
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Cuando abres una ventana secundaria (como <code>AgregarProducto.fxml</code> o <code>VerInventario.fxml</code> desde <code>MainMenuControlador</code>), JavaFX instancia un <strong>nuevo objeto controlador</strong> para esa vista. Si cada controlador hiciera <code>new Almacen()</code>, cada ventana tendría su propia lista vacía independiente.
+</p>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    En <strong>BlockBusterUIX</strong>, la clase <code>Almacen</code> aplica el patrón <strong>Singleton</strong> (constructor <code>private</code> y método estático <code>Almacen.getInstance()</code>) para garantizar que todas las ventanas lean y modifiquen exactamente el mismo inventario en memoria:
+</p>
+
+<div class="code-wrapper relative pt-6 mb-6">
+    <div class="absolute top-0 left-0 bg-cyan-500/20 text-cyan-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-cyan-300 text-sm"></i> Almacen.java (Singleton compartido por toda la aplicación)
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">package CodigoClases.almacen;
+
+import CodigoClases.modelo.Producto;
+import java.util.LinkedList;
+
+public class Almacen {
+    private LinkedList<Producto> Inventario = new LinkedList<>();
+    private static Almacen BlockBuster; // Única instancia estática
+
+    // 1. Constructor privado: nadie fuera de esta clase puede hacer "new Almacen()"
+    private Almacen() {
+    }
+
+    // 2. Punto de acceso global: crea la instancia solo la primera vez que se llama
+    public static Almacen getInstance() {
+        if (BlockBuster == null) {
+            BlockBuster = new Almacen();
+        }
+        return BlockBuster;
+    }
+
+    public void agregarProducto(Producto producto) {
+        Inventario.add(producto);
+    }
+
+    public LinkedList<Producto> getInventario() {
+        return Inventario;
+    }
+}</code></pre>
+</div>

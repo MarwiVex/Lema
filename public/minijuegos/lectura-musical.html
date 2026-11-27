@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lectura a Primera Vista - Espectro Completo</title>
+    <script src="./vexflow.js"></script>
+    <style>
+        :root {
+            --bg: #121212;
+            --panel-bg: #1e1e1e;
+            --text: #e0e0e0;
+            --primary: #bb86fc;
+            --success: #03dac6;
+            --error: #cf6679;
+            --border: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        .app-container {
+            background-color: var(--panel-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-width: 650px;
+            width: 95%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            background-color: var(--bg);
+            padding: 15px 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            border: 1px solid var(--border);
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-item span {
+            margin-top: 5px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .settings {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+        }
+
+        .settings label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            gap: 5px;
+        }
+
+        .staff-wrapper {
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 0 auto 15px auto;
+            width: fit-content;
+            min-width: 280px;
+            height: 300px; /* Aumentado para evitar clipping en E3 y E6 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Inversión de color para VexFlow en modo oscuro */
+        #staff svg path, 
+        #staff svg rect, 
+        #staff svg text {
+            fill: var(--text) !important;
+            stroke: var(--text) !important;
+        }
+
+        .feedback {
+            height: 24px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        .btn-note {
+            background-color: var(--bg);
+            color: var(--text);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 15px 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+        }
+
+        .btn-note:hover {
+            border-color: var(--primary);
+            background-color: #2c2c2c;
+        }
+
+        .btn-note:active {
+            transform: scale(0.95);
+        }
+
+        .btn-note.correct {
+            background-color: var(--success);
+            border-color: var(--success);
+            color: #000;
+        }
+
+        .btn-note.wrong {
+            background-color: var(--error);
+            border-color: var(--error);
+            color: #000;
+        }
+
+        .keyboard-hint {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        @media (max-width: 550px) {
+            .stats-container {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+            }
+            .controls {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .controls button:nth-last-child(-n+3) {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <h1>Lectura a Primera Vista - Análisis de Latencia</h1>
+        
+        <div class="settings">
+            <!-- Inicializados en 'checked' para abarcar todo el espectro por defecto -->
+            <label><input type="checkbox" id="chk-lower" checked> Líneas Inf. (E3-D4)</label>
+            <label><input type="checkbox" id="chk-staff" checked> Pentagrama (E4-F5)</label>
+            <label><input type="checkbox" id="chk-upper" checked> Líneas Sup. (G5-E6)</label>
+            <label><input type="checkbox" id="chk-all" checked> Espectro Completo</label>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-item">Racha<span id="st-streak">0</span></div>
+            <div class="stat-item">Aciertos<span id="st-hits">0</span></div>
+            <div class="stat-item">Fallos<span id="st-misses">0</span></div>
+            <div class="stat-item">Precisión<span id="st-acc">0%</span></div>
+            <div class="stat-item">TR Promedio<span id="st-time">0.00s</span></div>
+        </div>
+
+        <div class="staff-wrapper">
+            <div id="staff"></div>
+        </div>
+
+        <div class="feedback" id="feedback">&nbsp;</div>
+
+        <div class="controls">
+            <button class="btn-note" id="btn-C" onclick="processInput('C')">C</button>
+            <button class="btn-note" id="btn-D" onclick="processInput('D')">D</button>
+            <button class="btn-note" id="btn-E" onclick="processInput('E')">E</button>
+            <button class="btn-note" id="btn-F" onclick="processInput('F')">F</button>
+            <button class="btn-note" id="btn-G" onclick="processInput('G')">G</button>
+            <button class="btn-note" id="btn-A" onclick="processInput('A')">A</button>
+            <button class="btn-note" id="btn-B" onclick="processInput('B')">B</button>
+        </div>
+
+        <div class="keyboard-hint">Entrada por teclado habilitada (Teclas C, D, E, F, G, A, B).</div>
+    </div>
+
+    <script>
+        const VF = Vex.Flow;
+
+        const notesLower = [
+            { id: 'e/3', name: 'E' }, { id: 'f/3', name: 'F' }, { id: 'g/3', name: 'G' },
+            { id: 'a/3', name: 'A' }, { id: 'b/3', name: 'B' }, { id: 'c/4', name: 'C' }, { id: 'd/4', name: 'D' }
+        ];
+        const notesStaff = [
+            { id: 'e/4', name: 'E' }, { id: 'f/4', name: 'F' }, { id: 'g/4', name: 'G' }, { id: 'a/4', name: 'A' },
+            { id: 'b/4', name: 'B' }, { id: 'c/5', name: 'C' }, { id: 'd/5', name: 'D' }, { id: 'e/5', name: 'E' },
+            { id: 'f/5', name: 'F' }
+        ];
+        const notesUpper = [
+            { id: 'g/5', name: 'G' }, { id: 'a/5', name: 'A' }, { id: 'b/5', name: 'B' },
+            { id: 'c/6', name: 'C' }, { id: 'd/6', name: 'D' }, { id: 'e/6', name: 'E' }
+        ];
+
+        let currentNote = null;
+        let isWaiting = false;
+        let nextNoteTimer = null;
+        
+        let stats = { streak: 0, hits: 0, misses: 0 };
+        let renderTimestamp = 0;
+        let totalReactionTimeMs = 0;
+
+        const chkLower = document.getElementById('chk-lower');
+        const chkStaff = document.getElementById('chk-staff');
+        const chkUpper = document.getElementById('chk-upper');
+        const chkAll = document.getElementById('chk-all');
+
+        const synchronizeToggles = () => {
+            chkAll.checked = chkLower.checked && chkStaff.checked && chkUpper.checked;
+        };
+
+        const handleRangeChange = () => {
+            if (nextNoteTimer) {
+                clearTimeout(nextNoteTimer);
+                nextNoteTimer = null;
+            }
+            const pool = getActiveNotePool();
+            if (isWaiting || !currentNote || !pool.some((n) => n.id === currentNote.id)) {
+                instantiateNextNote();
+            }
+        };
+
+        [chkLower, chkStaff, chkUpper].forEach(chk => {
+            chk.addEventListener('change', () => {
+                if (!chkLower.checked && !chkStaff.checked && !chkUpper.checked) {
+                    chkStaff.checked = true; 
+                }
+                synchronizeToggles();
+                handleRangeChange();
+            });
+        });
+
+        chkAll.addEventListener('change', (e) => {
+            const state = e.target.checked;
+            chkLower.checked = state;
+            chkStaff.checked = state;
+            chkUpper.checked = state;
+            if (!state) chkStaff.checked = true;
+            handleRangeChange();
+        });
+
+        function getActiveNotePool() {
+            let pool = [];
+            if (chkLower.checked) pool = pool.concat(notesLower);
+            if (chkStaff.checked) pool = pool.concat(notesStaff);
+            if (chkUpper.checked) pool = pool.concat(notesUpper);
+            return pool;
+        }
+
+        function renderVexFlowNote(noteId) {
+            const container = document.getElementById('staff');
+            container.innerHTML = ''; 
+
+            const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
+            // Ampliación del lienzo para dar holgura a las líneas adicionales extremas
+            renderer.resize(250, 300); 
+            const context = renderer.getContext();
+
+            // Desplazamiento Y=120 para centrar el pentagrama verticalmente
+            const stave = new VF.Stave(25, 120, 200);
+            stave.addClef("treble");
+            stave.setContext(context).draw();
+
+            const note = new VF.StaveNote({ keys: [noteId], duration: "q", auto_stem: true });
+            
+            const voice = new VF.Voice({ num_beats: 1, beat_value: 4 });
+            voice.addTickables([note]);
+
+            new VF.Formatter().joinVoices([voice]).format([voice], 150);
+            voice.draw(context, stave);
+        }
+
+        function updateTelemetryUI() {
+            document.getElementById('st-streak').innerText = stats.streak;
+            document.getElementById('st-hits').innerText = stats.hits;
+            document.getElementById('st-misses').innerText = stats.misses;
+            
+            const totalAttempts = stats.hits + stats.misses;
+            const accuracy = totalAttempts === 0 ? 0 : Math.round((stats.hits / totalAttempts) * 100);
+            document.getElementById('st-acc').innerText = `${accuracy}%`;
+
+            if (stats.hits > 0) {
+                const avgSeconds = (totalReactionTimeMs / stats.hits) / 1000;
+                document.getElementById('st-time').innerText = `${avgSeconds.toFixed(2)}s`;
+            }
+        }
+
+        function instantiateNextNote() {
+            if (nextNoteTimer) {
+                clearTimeout(nextNoteTimer);
+                nextNoteTimer = null;
+            }
+            const pool = getActiveNotePool();
+            const randomIndex = Math.floor(Math.random() * pool.length);
+            currentNote = pool[randomIndex];
+            
+            renderVexFlowNote(currentNote.id);
+            
+            document.getElementById('feedback').innerHTML = '&nbsp;';
+            document.querySelectorAll('.btn-note').forEach(btn => {
+                btn.classList.remove('correct', 'wrong');
+            });
+            
+            isWaiting = false;
+            renderTimestamp = performance.now(); 
+        }
+
+        function processInput(letter) {
+            if (isWaiting || !currentNote) return;
+            const reactionTime = performance.now() - renderTimestamp;
+            isWaiting = true;
+
+            const isCorrect = (letter === currentNote.name);
+            const btn = document.getElementById(`btn-${letter}`);
+            const feedback = document.getElementById('feedback');
+
+            if (isCorrect) {
+                stats.hits++;
+                stats.streak++;
+                totalReactionTimeMs += reactionTime; 
+                
+                btn.classList.add('correct');
+                feedback.innerText = `¡Correcto! (Latencia: ${(reactionTime / 1000).toFixed(2)}s)`;
+                feedback.style.color = 'var(--success)';
+                updateTelemetryUI();
+                
+                nextNoteTimer = setTimeout(instantiateNextNote, 400);
+            } else {
+                stats.misses++;
+                stats.streak = 0;
+                btn.classList.add('wrong');
+                
+                const correctBtn = document.getElementById(`btn-${currentNote.name}`);
+                correctBtn.classList.add('correct');
+                
+                feedback.innerText = `Error computado. La nota requerida era ${currentNote.name}`;
+                feedback.style.color = 'var(--error)';
+                updateTelemetryUI();
+                
+                nextNoteTimer = setTimeout(instantiateNextNote, 1500);
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+            const tag = e.target && e.target.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+            const key = e.key.toUpperCase();
+            if (['C', 'D', 'E', 'F', 'G', 'A', 'B'].includes(key)) {
+                processInput(key);
+            }
+        });
+
+        window.onload = instantiateNextNote;
+    </script>
+</body>
+</html>

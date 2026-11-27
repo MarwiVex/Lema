@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Interactivo: De C a Java</title>
+    
+    <!-- Fuentes y Tailwind CSS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Highlight.js para colorear el código -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/tokyo-night-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/ini.min.js"></script>
+    
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script type="module" crossorigin src="/java/assets/index-BTQ_CKp1.js"></script>
+  <link rel="stylesheet" crossorigin href="/java/assets/index-DxGj0fsz.css">
+</head>
+<body class="antialiased selection:bg-blue-500/30">
+
+    <!-- Layout Principal -->
+    <div class="h-screen w-full flex flex-col md:flex-row">
+        
+        <!-- COLUMNA 1: Sidebar de Navegación -->
+        <aside class="w-full md:w-[20%] lg:min-w-[280px] h-auto md:h-full glass p-6 flex flex-col custom-scrollbar overflow-y-auto shrink-0 z-20">
+            <div class="mb-4">
+                <a href="/" class="inline-flex items-center gap-2 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 px-3 py-1.5 rounded-lg border border-slate-700/60 transition-all shadow-sm">
+                    <i class="fa-solid fa-arrow-left"></i> Volver a Lema
+                </a>
+            </div>
+            <div class="mb-8 mt-1">
+                <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 mb-2">Java Core</h1>
+                <p class="text-slate-400 text-xs leading-relaxed">Transición C <i class="fa-solid fa-arrow-right mx-1"></i> Java.<br>Aprende, copia y compila.</p>
+            </div>
+
+            <nav class="flex flex-col space-y-2 mb-8">
+                <button onclick="switchTab('intro')" id="tab-intro" class="btn-tab active text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">1. Básicos: Variables y Print</button>
+                <button onclick="switchTab('io-control')" id="tab-io-control" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">2. Control, Funciones y Scanner</button>
+                <button onclick="switchTab('arreglos')" id="tab-arreglos" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">3. Arreglos y Bucles For-Each</button>
+                <button onclick="switchTab('matrices')" id="tab-matrices" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">4. Matrices y Copias (¡Core!)</button>
+                <button onclick="switchTab('poo')" id="tab-poo" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">5. Intro a POO</button>
+                <button onclick="switchTab('uml')" id="tab-uml" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">6. Diagramas UML & Herencia</button>
+                <button onclick="switchTab('poo-avanzado')" id="tab-poo-avanzado" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">7. POO Avanzado & Listas (NUEVO)</button>
+                <button onclick="switchTab('excepciones')" id="tab-excepciones" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">8. Manejo de Excepciones (NUEVO)</button>
+                <button onclick="switchTab('archivos')" id="tab-archivos" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">9. Archivos e IO (NUEVO)</button>
+                <button onclick="switchTab('binarios')" id="tab-binarios" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">10. Archivos Binarios & Serialización (NUEVO)</button>
+                <button onclick="switchTab('interfaces')" id="tab-interfaces" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">11. Interfaces & Comparadores (NUEVO)</button>
+                <button onclick="switchTab('enums')" id="tab-enums" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">12. Enums (NUEVO)</button>
+                <button onclick="switchTab('clone')" id="tab-clone" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">13. Clone vs Referencia (NUEVO)</button>
+                <button onclick="switchTab('javafx')" id="tab-javafx" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">14. JavaFX & Scene Builder (NUEVO)</button>
+                <button onclick="switchTab('javafx-avanzado')" id="tab-javafx-avanzado" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">15. JavaFX: Tablas, Alertas y UI (NUEVO)</button>
+                <button onclick="switchTab('propiedades')" id="tab-propiedades" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">16. Propiedades (.properties) & Locale (NUEVO)</button>
+                <button onclick="switchTab('bd-fundamentos')" id="tab-bd-fundamentos" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">17. Teoría de BD, SQLite vs MySQL & SQL (NUEVO)</button>
+                <button onclick="switchTab('bd-herramientas')" id="tab-bd-herramientas" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">18. Guía: DB Browser y XAMPP (NUEVO)</button>
+                <button onclick="switchTab('jdbc-dao')" id="tab-jdbc-dao" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">19. JDBC, Singleton y ADMON/DAO (NUEVO)</button>
+                <button onclick="switchTab('reportes-jasper')" id="tab-reportes-jasper" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">20. Reportes PDF con JasperReports (NUEVO)</button>
+                <button onclick="switchTab('reportes-jasper-bd')" id="tab-reportes-jasper-bd" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-slate-300 text-sm">21. JasperReports con BD y SQL (NUEVO)</button>
+                <div class="my-2 border-b border-white/10"></div>
+                <button onclick="switchTab('laboratorio')" id="tab-laboratorio" class="btn-tab text-left px-4 py-3 rounded-r-lg hover:bg-white/5 text-emerald-400 font-bold flex items-center justify-between text-sm">
+                    Laboratorio Autoevaluable
+                    <i class="fa-solid fa-code"></i>
+                </button>
+            </nav>
+            
+            <div class="mt-auto p-4 bg-blue-900/20 border border-blue-500/20 rounded-xl text-xs text-blue-200">
+                <p><i class="fa-solid fa-lightbulb text-yellow-400 mr-2"></i><strong>Tip:</strong> Pasa el ratón por el código, usa el botón <strong>Copiar</strong> y abre la <strong>Terminal Global</strong> (botón flotante inferior) para ejecutarlo.</p>
+            </div>
+        </aside>
+
+        <!-- COLUMNA 2: Contenido Principal (Renderizado Dinámico) -->
+        <main id="main-content" class="w-full flex-1 min-h-0 custom-scrollbar overflow-y-auto bg-[#0b0f19] p-8 md:p-12 lg:px-24 xl:px-32 relative tab-content active">
+            <!-- El contenido se inyecta aquí a través de src/main.js -->
+        </main>
+    </div>
+
+    <!-- Botón Flotante para Abrir Terminal -->
+    <button onclick="toggleTerminal()" class="fixed bottom-6 right-6 z-40 bg-blue-600 hover:bg-blue-500 text-white rounded-full p-4 shadow-[0_0_25px_rgba(59,130,246,0.6)] transition-all duration-300 hover:scale-105 flex items-center gap-3 font-semibold group border border-blue-400/50">
+        <i class="fa-solid fa-terminal text-lg"></i>
+        <span class="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-500 ease-in-out opacity-0 group-hover:opacity-100 pr-1">Abrir Compilador</span>
+    </button>
+
+    <!-- Overlay oscuro para el modal (Pantallas pequeñas) -->
+    <div id="terminal-overlay" onclick="toggleTerminal()" class="fixed inset-0 bg-black/50 z-40 hidden backdrop-blur-sm transition-opacity duration-300 opacity-0"></div>
+
+    <!-- Widget del Compilador (Slide-over) -->
+    <div id="terminal-widget" class="fixed top-0 right-0 h-full w-full md:w-[60%] lg:w-[45%] xl:w-[40%] bg-[#05080f] shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out border-l border-white/10 flex flex-col">
+        <!-- Header del Widget -->
+        <div class="bg-[#0b101e] p-4 border-b border-white/5 flex justify-between items-center shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-3 h-3 rounded-full bg-rose-500"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                <span class="ml-2 font-mono text-sm text-slate-300 font-bold tracking-wide">Terminal Global</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-xs font-semibold text-blue-400 bg-blue-500/10 px-3 py-1.5 rounded-full border border-blue-500/20 shadow-inner hidden sm:flex">
+                    <i class="fa-solid fa-play mr-2"></i>En Vivo
+                </span>
+                <button onclick="toggleTerminal()" class="text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg p-2 transition-colors flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Iframe de OneCompiler -->
+        <div class="flex-grow w-full relative bg-[#1e1e1e]">
+            <iframe 
+                id="compiler-frame"
+                src="https://onecompiler.com/embed/java?hideLanguageSelection=true&hideNew=true&hideTitle=true" 
+                class="w-full h-full border-0 absolute top-0 left-0">
+            </iframe>
+        </div>
+    </div>
+
+    <!-- Toast Notification Element -->
+    <div id="toast"><i class="fa-regular fa-clipboard mr-2"></i>¡Código copiado! Pégalo en la Terminal Global (Ctrl+V)</div>
+
+</body>
+</html>

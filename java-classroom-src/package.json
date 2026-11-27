@@ -1,0 +1,26 @@
+{
+  "name": "java-interactive-classroom",
+  "version": "1.0.0",
+  "description": "Una plataforma educativa web interactiva y autocontenida para aprender los fundamentos de la programación en Java, diseñada especialmente para estudiantes con conocimientos previos en C.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MarwiVex/java-interactive-classroom.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MarwiVex/java-interactive-classroom/issues"
+  },
+  "homepage": "https://github.com/MarwiVex/java-interactive-classroom#readme",
+  "devDependencies": {
+    "vite": "^8.2.2"
+  }
+}

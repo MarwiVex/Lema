@@ -1,0 +1,46 @@
+{
+  "name": "Lema — Segundo Cerebro",
+  "short_name": "Lema",
+  "description": "Sistema privado de notas, cheat sheets LaTeX y pizarrón matemático con IA.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0d14",
+  "theme_color": "#6366f1",
+  "lang": "es",
+  "categories": ["productivity", "education"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nuevo Apunte",
+      "short_name": "Nuevo",
+      "description": "Abrir el dashboard para crear un nuevo apunte",
+      "url": "/"
+    }
+  ]
+}

@@ -1,0 +1,152 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-blue-500/20 text-blue-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-folder-open"></i></span>
+    Archivos, Entradas y Salidas (I/O)
+</h2>
+
+<p class="text-slate-300 mb-8 text-base leading-relaxed">
+    El manejo de archivos en Java es crucial para la persistencia de datos. Hasta ahora, todos los datos en las variables se pierden cuando el programa termina. Con el paquete <code>java.io</code>, podemos guardar información en el disco duro y recuperarla posteriormente.
+</p>
+
+<!-- 1. LA CLASE FILE -->
+<h3 class="text-2xl font-bold text-blue-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-file text-blue-400"></i> 1. La clase <code>File</code>
+</h3>
+
+<div class="glass p-6 rounded-xl border-l-4 border-l-blue-500 mb-6">
+    <h4 class="font-bold text-lg text-blue-300 mb-2">Representación en Memoria</h4>
+    <p class="text-sm text-slate-300 leading-relaxed mb-4">
+        La clase <code>File</code> <strong>NO representa el contenido</strong> del archivo, sino la <strong>ruta o el enlace</strong> hacia el archivo en el sistema operativo. Puede apuntar a un archivo existente, a un directorio, o a un archivo que aún no existe y planeamos crear.
+    </p>
+    <div class="bg-black/40 p-4 rounded-lg font-mono text-xs text-slate-300 border border-white/10">
+        <span class="text-emerald-400 font-bold block mb-2">// Importación necesaria</span>
+        <span class="text-slate-300">import java.io.File;</span><br><br>
+        
+        <span class="text-emerald-400 font-bold block mb-2">// Crear la referencia al archivo</span>
+        <span class="text-slate-300">File archivo = new File("datos.txt");</span><br><br>
+        
+        <span class="text-emerald-400 font-bold block mb-2">// Métodos útiles de File</span>
+        <span class="text-slate-300">System.out.println(archivo.exists()); </span><span class="text-slate-500">// ¿Existe físicamente?</span><br>
+        <span class="text-slate-300">System.out.println(archivo.isFile()); </span><span class="text-slate-500">// ¿Es un archivo normal?</span><br>
+        <span class="text-slate-300">System.out.println(archivo.isDirectory()); </span><span class="text-slate-500">// ¿Es una carpeta?</span><br>
+    </div>
+</div>
+
+<!-- 2. WRITER Y BUFFEREDWRITER -->
+<h3 class="text-2xl font-bold text-emerald-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-pen-to-square text-emerald-400"></i> 2. Escritura: <code>FileWriter</code> y <code>BufferedWriter</code>
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Para escribir texto en un archivo, usamos clases de tipo <em>Writer</em>.
+</p>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <div class="glass p-6 rounded-xl border-l-4 border-l-rose-500">
+        <h4 class="font-bold text-rose-400 mb-2">FileWriter (Sin Buffer)</h4>
+        <p class="text-xs text-slate-300 leading-relaxed mb-3">
+            Escribe los datos directamente en el disco duro carácter por carácter. Es <strong>muy lento</strong> porque el disco duro es el componente más lento de la computadora. Hacer múltiples viajes pequeños al disco penaliza el rendimiento.
+        </p>
+    </div>
+
+    <div class="glass p-6 rounded-xl border-l-4 border-l-emerald-500">
+        <h4 class="font-bold text-emerald-400 mb-2">BufferedWriter (Con Buffer)</h4>
+        <p class="text-xs text-slate-300 leading-relaxed mb-3">
+            Actúa como un "carrito de compras" en la memoria RAM. Acumula todos los textos que quieres escribir y, cuando el carrito está lleno (o cuando llamas a <code>flush()</code> o cierras el archivo), hace un <strong>único viaje</strong> al disco duro. Es <strong>mucho más rápido y eficiente</strong>.
+        </p>
+    </div>
+</div>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-emerald-300 text-sm"></i> Escritura.java
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">import java.io.*;
+
+public class Escritura {
+    public static void guardar(String nombreArchivo) {
+        File nuevo = new File(nombreArchivo);
+        
+        // El try-with-resources cierra automáticamente el archivo al terminar
+        try (FileWriter fw = new FileWriter(nuevo);
+             BufferedWriter bw = new BufferedWriter(fw)) {
+             
+            bw.write("JUGUETE|SKU123|ACTIVO|Pelota|Hasbro|1");
+            bw.newLine(); // Agrega un salto de línea compatible con cualquier SO
+            
+            // También puedes usar String.format para escribir datos formateados
+            bw.write(String.format("%s|%s|%s|%s|%d", "PELICULA", "SKU999", "ACTIVO", "Matrix", 1999));
+            
+        } catch (IOException e) {
+            System.err.println("Error al intentar escribir en el disco.");
+        }
+    }
+}</code></pre>
+</div>
+
+<!-- 3. READER Y BUFFEREDREADER -->
+<h3 class="text-2xl font-bold text-purple-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-book-open text-purple-400"></i> 3. Lectura: <code>FileReader</code> y <code>BufferedReader</code>
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    De manera análoga a la escritura, para leer usamos el <code>FileReader</code> envuelto en un <code>BufferedReader</code>, el cual nos proporciona el útil método <code>readLine()</code> para leer el archivo línea por línea hasta llegar al final (que devuelve <code>null</code>).
+</p>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-purple-500/20 text-purple-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-purple-300 text-sm"></i> Lectura.java
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">import java.io.*;
+import java.util.regex.Pattern;
+
+public class Lectura {
+    public static void leerArchivo(String nombreArchivo, String separador) {
+        File archivo = new File(nombreArchivo);
+        // Pattern.quote asegura que si el separador es un caracter especial (como | o .), se interprete literalmente
+        String sep = Pattern.quote(separador);
+
+        // Se usa try-with-resources. El BufferedReader se encarga de cerrar el FileReader subyacente.
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String linea;
+            
+            // Leemos línea por línea hasta que devuelva null (fin del archivo)
+            while ((linea = br.readLine()) != null) {
+                // Separamos la línea usando el separador especificado
+                String[] datos = linea.split(sep);
+                
+                String tipo = datos[0];
+                System.out.println("Cargando tipo: " + tipo);
+                // Aquí podrías usar un switch para instanciar el objeto correcto según 'tipo'
+            }
+            
+        } catch (FileNotFoundException e) {
+            System.err.println("El archivo especificado no existe: " + nombreArchivo);
+        } catch (IOException e) {
+            System.err.println("Error de I/O al leer el archivo.");
+        }
+    }
+}</code></pre>
+</div>
+
+<!-- 4. EXCEPCIONES COMUNES EN I/O -->
+<div class="glass p-6 rounded-xl border border-amber-500/30 mb-8">
+    <h4 class="font-bold text-amber-300 mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> Excepciones Checked de I/O
+    </h4>
+    <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+        El manejo de archivos te obliga obligatoriamente (son <em>Checked Exceptions</em>) a usar bloques <code>try-catch</code>.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <span class="text-xs font-bold text-rose-400 block mb-1">FileNotFoundException:</span>
+            <p class="text-xs text-slate-400">Se lanza específicamente cuando intentas <strong>leer</strong> (<code>FileReader</code>) un archivo que no existe en la ruta proporcionada. (Al escribir, <code>FileWriter</code> suele crear el archivo si no existe, a menos que la carpeta tampoco exista o no haya permisos).</p>
+        </div>
+        <div>
+            <span class="text-xs font-bold text-amber-400 block mb-1">IOException:</span>
+            <p class="text-xs text-slate-400">La excepción padre para problemas de entrada/salida. Puede lanzarse si el disco está lleno, si se pierde la conexión a una unidad de red, o si el archivo está bloqueado por otro programa.</p>
+        </div>
+    </div>
+</div>

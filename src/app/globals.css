@@ -1,0 +1,231 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --font-sans: var(--font-inter), 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono), 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  --color-canvas: var(--bg-primary);
+  --color-surface: var(--bg-secondary);
+  --color-surface-elevated: var(--bg-elevated);
+  --color-surface-subtle: var(--bg-tertiary);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-ink-primary: var(--text-primary);
+  --color-ink-secondary: var(--text-secondary);
+  --color-ink-muted: var(--text-muted);
+}
+
+@layer base {
+  :root {
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --bg-elevated: #ffffff;
+    --bg-tertiary: #f1f5f9;
+    --accent-cyan: #0891b2;
+    --accent-indigo: #4f46e5;
+    --accent-violet: #7c3aed;
+    --accent-rose: #e11d48;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #5b6b82;
+    --border-subtle: rgba(15, 23, 42, 0.1);
+    --border-strong: rgba(15, 23, 42, 0.2);
+    --border-glass: rgba(15, 23, 42, 0.08);
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --card-bg: rgba(255, 255, 255, 0.92);
+    --katex-bg: rgba(241, 245, 249, 0.9);
+  }
+
+  .dark {
+    --bg-primary: #0a0d14;
+    --bg-secondary: #0f1523;
+    --bg-elevated: #151d2e;
+    --bg-tertiary: #1a2338;
+    --accent-cyan: #06b6d4;
+    --accent-indigo: #6366f1;
+    --accent-violet: #8b5cf6;
+    --accent-rose: #f43f5e;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --border-subtle: rgba(148, 163, 184, 0.14);
+    --border-strong: rgba(148, 163, 184, 0.28);
+    --border-glass: rgba(255, 255, 255, 0.08);
+    --glass-bg: rgba(15, 21, 35, 0.78);
+    --card-bg: rgba(18, 24, 38, 0.85);
+    --katex-bg: rgba(15, 23, 42, 0.65);
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    overflow-x: clip;
+  }
+}
+
+/* ── Glassmorphism & surface utilities ────────────────────────────────────── */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glass);
+}
+
+.card-surface {
+  background: var(--card-bg);
+  border: 1px solid var(--border-subtle);
+}
+
+.glass-glow {
+  box-shadow: 0 8px 30px -6px rgba(15, 23, 42, 0.08), 0 0 0 1px var(--border-subtle);
+}
+
+.dark .glass-glow {
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), 0 0 20px 0 rgba(99, 102, 241, 0.15);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #0284c7 0%, #4f46e5 50%, #9333ea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dark .gradient-text {
+  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── Custom Scrollbars ────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-indigo);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ── BlockNote theme integration ──────────────────────────────────────────── */
+.bn-container {
+  background-color: transparent !important;
+  color: var(--text-primary) !important;
+}
+
+.bn-editor {
+  padding-inline: 0 !important;
+}
+
+.bn-block-content {
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+/* ── Math KaTeX custom styling ────────────────────────────────────────────── */
+.katex-display {
+  margin: 1em 0 !important;
+  padding: 0.75rem 1rem;
+  background: var(--katex-bg);
+  border-radius: 0.5rem;
+  border-left: 3px solid var(--accent-cyan);
+  overflow-x: auto;
+}
+
+.katex-display-wrap {
+  margin: 0.6em 0;
+  padding: 0.6rem 1rem;
+  background: rgba(6, 182, 212, 0.08);
+  border-radius: 0.5rem;
+  border-left: 3px solid var(--accent-cyan);
+  overflow-x: auto;
+}
+
+.math-preview-content {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: var(--text-primary);
+}
+
+.math-preview-content .katex {
+  font-size: 1.05em;
+}
+
+/* ── Math Box block — editable header ─────────────────────────────────────── */
+.math-box-type-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.4rem center;
+  background-size: 10px 6px;
+  padding-right: 1.4rem !important;
+}
+
+.math-box-type-select::-ms-expand {
+  display: none;
+}
+
+.math-box-block:hover .math-box-header span[title] {
+  opacity: 0.9;
+}
+
+.math-box-header input[type="text"] {
+  background: transparent;
+  caret-color: currentColor;
+}
+
+/* ── Keyframe animations ──────────────────────────────────────────────────── */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  20%, 60% {
+    transform: translateX(-5px);
+  }
+  40%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.35s ease-in-out;
+}

@@ -1,0 +1,470 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-rose-500/20 text-rose-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-database"></i></span>
+    21. JasperReports con Base de Datos: Data Adapter, Dataset SQL e Integración en IntelliJ
+</h2>
+
+<p class="text-slate-300 mb-8 text-base leading-relaxed">
+    En la sección anterior alimentamos el reporte enviando una <code>LinkedList&lt;Cafe&gt;</code> desde Java (<code>JRBeanCollectionDataSource</code>), pero eso tenía una limitación importante: el objeto <code>Cafe</code> solo guardaba el número <code>variedadCafe</code> (ID foráneo) y no el nombre de la variedad. En esta sección veremos el flujo completo de <strong>JasperReports conectado directamente a una Base de Datos mediante SQL</strong> tal como se implementó en el repositorio <a href="https://github.com/MarwiVex/baseDatos" target="_blank" class="text-blue-400 hover:underline font-mono">MarwiVex/baseDatos</a>: descargar el <code>.jar</code> de Maven, crear el <strong>Data Adapter</strong> en Jaspersoft Studio, configurar el <strong>Dataset and Query</strong> con clic derecho usando <code>INNER JOIN</code>, pasar los parámetros y la conexión desde <strong>IntelliJ IDEA</strong>, y lanzar el reporte desde un botón en <strong>JavaFX</strong>.
+</p>
+
+<!-- COMPARATIVA RÁPIDA: SECCIÓN 20 VS SECCIÓN 21 -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+    <div class="glass p-5 rounded-xl border-l-4 border-l-purple-500">
+        <div class="text-xs font-mono text-purple-400 mb-1">ENFOQUE 1 (Sección 20): Colección de Objetos</div>
+        <h4 class="font-bold text-white text-sm mb-2"><code>JRBeanCollectionDataSource(cafes)</code></h4>
+        <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside leading-relaxed">
+            <li>El archivo <code>.jrxml</code> <strong>no tiene consulta SQL</strong>.</li>
+            <li>Los campos <code>$F{...}</code> leen los getters de <code>Cafe.java</code> por reflexión.</li>
+            <li>Tercer parámetro de <code>fillReport</code>: el objeto <code>JRBeanCollectionDataSource</code>.</li>
+        </ul>
+    </div>
+
+    <div class="glass p-5 rounded-xl border-l-4 border-l-emerald-500">
+        <div class="text-xs font-mono text-emerald-400 mb-1">ENFOQUE 2 (Sección 21): Conexión Directa a BD + SQL</div>
+        <h4 class="font-bold text-white text-sm mb-2"><code>datos.getConexion()</code> + <code>&lt;query language="SQL"&gt;</code></h4>
+        <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside leading-relaxed">
+            <li>El reporte guarda adentro su propia consulta SQL con <code>INNER JOIN</code>.</li>
+            <li>Permite cruzar tablas (<code>Cafe</code> + <code>VariedadCafe</code>) para mostrar el nombre de la variedad.</li>
+            <li>Tercer parámetro de <code>fillReport</code>: el objeto <code>Connection</code> (<code>datos.getConexion()</code>).</li>
+        </ul>
+    </div>
+</div>
+
+<!-- PASO 1: DESCARGAR EL .JAR DE MAVEN PARA EL ADAPTADOR -->
+<h3 class="text-2xl font-bold text-amber-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-box-archive text-amber-400"></i> 1. Obtener el Driver <code>.jar</code> de Maven para Jaspersoft Studio
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Aunque IntelliJ descarga automáticamente los drivers JDBC gracias al <code>pom.xml</code>, <strong>Jaspersoft Studio es un programa independiente</strong> y no lee tu <code>pom.xml</code>. Para que Jaspersoft Studio pueda abrir tu archivo <code>informacion.db</code> (SQLite) o conectarse a MySQL mientras diseñas el reporte, necesitas indicarle la ruta del archivo <strong><code>.jar</code> del conector JDBC</strong>. Tienes <strong>3 formas</strong> de obtenerlo:
+</p>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+    <div class="glass p-5 rounded-xl border-t-4 border-t-amber-500">
+        <h4 class="font-bold text-amber-300 text-sm mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-globe"></i> Opción A: Descargar de Maven Repository
+        </h4>
+        <ol class="text-xs text-slate-300 space-y-2 list-decimal list-inside leading-relaxed">
+            <li>Entra a <code>mvnrepository.com</code> y busca <strong><code>sqlite-jdbc</code></strong> (grupo <code>org.xerial</code>, versión <code>3.47.0.0</code>) o <strong><code>mysql-connector-j</code></strong> (versión <code>8.4.0</code>).</li>
+            <li>Entra a la versión y en la fila <strong>Files</strong> haz clic en el botón <strong><code>jar</code></strong> para descargar <code>sqlite-jdbc-3.47.0.0.jar</code>.</li>
+            <li>Guárdalo en una carpeta accesible (por ejemplo, en Documentos o en la carpeta de tu proyecto).</li>
+        </ol>
+    </div>
+
+    <div class="glass p-5 rounded-xl border-t-4 border-t-cyan-500">
+        <h4 class="font-bold text-cyan-300 text-sm mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-folder-tree"></i> Opción B: Usar la Carpeta Local <code>.m2</code> de Maven
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed mb-2">
+            Como IntelliJ ya descargó las dependencias del <code>pom.xml</code>, el archivo <code>.jar</code> <strong>ya está en tu disco duro</strong> dentro de la caché oculta <code>.m2</code> de tu usuario:
+        </p>
+        <div class="bg-black/50 p-2.5 rounded-lg border border-white/10 font-mono text-[11px] text-cyan-200 break-all">
+            C:\Users\TuUsuario\.m2\repository\org\xerial\sqlite-jdbc\3.47.0.0\sqlite-jdbc-3.47.0.0.jar
+        </div>
+    </div>
+
+    <div class="glass p-5 rounded-xl border-t-4 border-t-emerald-500">
+        <h4 class="font-bold text-emerald-300 text-sm mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-terminal"></i> Opción C: Comando Maven en Terminal
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed mb-2">
+            Si abres la terminal integrada de <strong>IntelliJ IDEA</strong> (<code>Alt + F12</code>) y ejecutas este comando, Maven copiará todos los <code>.jar</code> de tu proyecto en <code>target/dependency/</code>:
+        </p>
+        <div class="bg-black/50 p-2.5 rounded-lg border border-white/10 font-mono text-[11px] text-emerald-300">
+            mvn dependency:copy-dependencies
+        </div>
+    </div>
+</div>
+
+<!-- PASO 2: CREAR EL DATA ADAPTER EN JASPERSOFT STUDIO -->
+<h3 class="text-2xl font-bold text-cyan-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-plug text-cyan-400"></i> 2. Crear el Data Adapter (<code>informacionCafe</code>) en Jaspersoft Studio
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Un <strong>Data Adapter</strong> le enseña a Jaspersoft Studio cómo conectarse a tu base de datos para validar tu consulta SQL y extraer las columnas automáticamente. Sigue estos pasos exactos:
+</p>
+
+<div class="glass p-6 rounded-xl border border-cyan-500/30 mb-8">
+    <ol class="text-xs text-slate-300 space-y-4 list-decimal list-inside leading-relaxed">
+        <li>
+            <strong class="text-white">Abrir el Repository Explorer:</strong> En Jaspersoft Studio, ubica el panel <strong>Repository Explorer</strong> (normalmente a la izquierda). Si no lo ves, ve al menú superior <em>Window &rarr; Show View &rarr; Other... &rarr; Jaspersoft Studio &rarr; Repository Explorer</em>.
+        </li>
+        <li>
+            <strong class="text-white">Clic derecho en Data Adapters:</strong> Dentro de <em>Repository Explorer</em>, haz <strong>clic derecho sobre el icono <code>Data Adapters</code></strong> &rarr; selecciona <strong><code>Create Data Adapter</code></strong>.
+        </li>
+        <li>
+            <strong class="text-white">Elegir tipo JDBC:</strong> En la lista elige <strong><code>Database JDBC Connection</code></strong> y haz clic en <strong>Next</strong>.
+        </li>
+        <li>
+            <strong class="text-amber-300">¡PRIMERO! Pestaña Inferior "Driver Classpath" (Agregar el <code>.jar</code>):</strong>
+            <div class="mt-1.5 ml-5 p-3 bg-amber-950/30 border border-amber-500/30 rounded-lg text-slate-300">
+                En la parte inferior de la ventana verás dos pestañas: <em>Database Location</em> y <em>Driver Classpath</em>. Entra a <strong><code>Driver Classpath</code></strong>, haz clic en el botón <strong><code>Add</code></strong> y selecciona el archivo <strong><code>sqlite-jdbc-3.47.0.0.jar</code></strong> (o <code>mysql-connector-j-8.4.0.jar</code>) que descargaste en el Paso 1.
+                <br><span class="text-rose-300 font-semibold">Nota:</span> Si olvidas este paso, al probar la conexión te dará el error <code>java.lang.ClassNotFoundException: org.sqlite.JDBC</code>.
+            </div>
+        </li>
+        <li>
+            <strong class="text-cyan-300">Pestaña Superior "Database Location" (Driver y Ruta / URL):</strong> Regresa a la pestaña <strong><code>Database Location</code></strong> y llena los datos exactamente así:
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-3 ml-5">
+                <div class="bg-black/60 p-4 rounded-lg border border-cyan-500/30">
+                    <div class="font-bold text-cyan-300 mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-file-shield"></i> Configuración para SQLite (<code>informacion.db</code>)
+                    </div>
+                    <ul class="space-y-1.5 font-mono text-[11px] text-slate-300">
+                        <li><span class="text-slate-400">Name:</span> <code class="text-emerald-300">informacionCafe</code></li>
+                        <li><span class="text-slate-400">JDBC Driver:</span> <code class="text-amber-300">org.sqlite.JDBC</code> <span class="font-sans text-slate-400">(escríbelo manualmente si no sale en la lista)</span></li>
+                        <li><span class="text-slate-400">JDBC Url:</span> <code class="text-cyan-300">jdbc:sqlite:C:/Users/TuUsuario/.../baseDatos/informacion.db</code></li>
+                        <li><span class="text-slate-400">Username / Password:</span> <span class="font-sans italic text-slate-400">(Dejar completamente en blanco)</span></li>
+                    </ul>
+                    <p class="mt-2 text-[11px] text-slate-400 font-sans">
+                        <i class="fa-solid fa-circle-info text-cyan-400 mr-1"></i> En Jaspersoft Studio <strong>sí debes poner la ruta absoluta completa</strong> hacia el archivo <code>informacion.db</code> de tu proyecto después de <code>jdbc:sqlite:</code>.
+                    </p>
+                </div>
+
+                <div class="bg-black/60 p-4 rounded-lg border border-amber-500/30">
+                    <div class="font-bold text-amber-300 mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-server"></i> Alternativa para MySQL / XAMPP (<code>informacion_db</code>)
+                    </div>
+                    <ul class="space-y-1.5 font-mono text-[11px] text-slate-300">
+                        <li><span class="text-slate-400">Name:</span> <code class="text-emerald-300">informacionCafe</code></li>
+                        <li><span class="text-slate-400">JDBC Driver:</span> <code class="text-amber-300">com.mysql.cj.jdbc.Driver</code></li>
+                        <li><span class="text-slate-400">JDBC Url:</span> <code class="text-cyan-300">jdbc:mysql://localhost:3306/informacion_db</code></li>
+                        <li><span class="text-slate-400">Username:</span> <code class="text-white">root</code> | <span class="text-slate-400">Password:</span> <span class="font-sans italic text-slate-400">(vacío)</span></li>
+                    </ul>
+                    <p class="mt-2 text-[11px] text-slate-400 font-sans">
+                        <i class="fa-solid fa-circle-info text-amber-400 mr-1"></i> Requiere tener encendido el módulo <strong>MySQL</strong> en el panel de control de XAMPP y agregar <code>mysql-connector-j-8.4.0.jar</code> en <em>Driver Classpath</em>.
+                    </p>
+                </div>
+            </div>
+        </li>
+        <li>
+            <strong class="text-emerald-300">Probar y Guardar:</strong> Haz clic en el botón <strong><code>Test</code></strong> (arriba a la derecha). Debe aparecer una ventana emergente diciendo <strong>"Successful"</strong>.Finalmente pulsa <strong><code>Finish</code></strong>.
+        </li>
+    </ol>
+</div>
+
+<!-- PASO 3: CLIC DERECHO -> DATASET AND QUERY Y COMANDO SQL -->
+<h3 class="text-2xl font-bold text-purple-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-computer-mouse text-purple-400"></i> 3. Clic Derecho &rarr; <code>Dataset and Query...</code> y Comando SQL con <code>INNER JOIN</code>
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Una vez creado el adaptador <code>informacionCafe</code>, hay que vincularlo a nuestro reporte y escribir la consulta SQL que extrae los cafés junto con el nombre de su variedad:
+</p>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <div class="glass p-5 rounded-xl border-l-4 border-l-purple-500">
+        <h4 class="font-bold text-purple-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-arrow-pointer"></i> ¿Dónde hacer Clic Derecho para abrir Dataset and Query?
+        </h4>
+        <ol class="text-xs text-slate-300 space-y-2 list-decimal list-inside leading-relaxed">
+            <li>Abre tu archivo <code>ReporteCafe.jrxml</code> en Jaspersoft Studio.</li>
+            <li>Ve al panel <strong>Outline</strong> (esquina inferior izquierda, donde están <em>Styles, Parameters, Fields, Variables, Title, Detail...</em>).</li>
+            <li>Haz <strong>clic derecho sobre el primer elemento raíz (<code>ReporteCafe</code>)</strong> y selecciona <strong><code>Dataset and Query...</code></strong> en el menú contextual.</li>
+            <li><em>Atajo alternativo:</em> También puedes hacer clic derecho directamente sobre una zona vacía del diseño del reporte &rarr; <strong><code>Dataset and Query...</code></strong> (o pulsar el icono de cilindro con una tabla en la esquina superior derecha del área de diseño).</li>
+        </ol>
+    </div>
+
+    <div class="glass p-5 rounded-xl border-l-4 border-l-emerald-500">
+        <h4 class="font-bold text-emerald-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Configurar el Diálogo y Leer los Campos (Read Fields)
+        </h4>
+        <ol class="text-xs text-slate-300 space-y-2 list-decimal list-inside leading-relaxed">
+            <li>En la esquina superior izquierda de la ventana <em>Dataset and Query Dialog</em>, despliega la lista de <strong>Data Adapter</strong> y selecciona tu adaptador <strong><code>informacionCafe</code></strong>.</li>
+            <li>Asegúrate de que en <strong>Language</strong> esté seleccionado <strong><code>SQL</code></strong> (en el panel izquierdo verás tus tablas <code>Cafe</code> y <code>VariedadCafe</code>).</li>
+            <li>Pega el comando SQL con <code>INNER JOIN</code> en el cuadro de texto central.</li>
+            <li>Haz clic en el botón <strong><code>Read Fields</code></strong> (arriba a la derecha). Verás cómo en la pestaña inferior <strong>Fields</strong> aparecen automáticamente <code>idcafe</code>, <code>productor</code>, <code>variedad</code> y <code>cantidad</code>.</li>
+            <li>(Opcional) Entra a la pestaña inferior <strong>Data Preview</strong> y pulsa <em>Refresh Preview Data</em> para verificar que devuelve los registros reales. Pulsa <strong>OK</strong>.</li>
+        </ol>
+    </div>
+</div>
+
+<!-- COMANDO SQL DEL REPORTE -->
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-purple-500/20 text-purple-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-solid fa-database text-purple-300 text-sm"></i> Comando SQL en "Dataset and Query" (Une Cafe y VariedadCafe)
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-sql">SELECT C.IDCafe, C.Productor, VC.Descripcion AS Variedad, C.Cantidad
+FROM Cafe C INNER JOIN VariedadCafe VC
+ON C.VariedadCafe=VC.IDVariedad</code></pre>
+</div>
+
+<div class="glass p-5 rounded-xl border border-amber-500/30 mb-8">
+    <h4 class="font-bold text-amber-300 text-sm mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-hammer text-amber-400"></i> Arrastrar <code>$F{variedad}</code> y Compilar a <code>ReporteCafeSQL.jasper</code>
+    </h4>
+    <p class="text-xs text-slate-300 leading-relaxed">
+        De vuelta en el diseño visual, abre el nodo <strong>Fields</strong> en el panel <em>Outline</em> y arrastra el nuevo campo <strong><code>variedad</code></strong> hacia la banda <strong>Detail</strong> (entre <em>Productor</em> y <em>Cantidad</em>). Jaspersoft creará automáticamente el encabezado estático <code>Variedad</code> en la banda <strong>Column Header</strong> y la expresión <code>$F{variedad}</code> en <strong>Detail</strong>.
+        <br><br>
+        Finalmente, haz clic en el icono del <strong>Martillo (Compile Report)</strong> en la barra superior de herramientas (o clic derecho sobre el reporte en el explorador &rarr; <em>Compile Report</em>). Esto generará el archivo compilado <strong><code>ReporteCafeSQL.jasper</code></strong> (y/o actualizará <code>ReporteCafe.jasper</code>), el cual debes <strong>copiar a la carpeta raíz de tu proyecto en IntelliJ IDEA</strong> (al mismo nivel que <code>pom.xml</code> e <code>informacion.db</code>).
+    </p>
+</div>
+
+<!-- ARCHIVO JRXML ACTUALIZADO COMPLETO -->
+<div class="code-wrapper relative pt-6 mb-10">
+    <div class="absolute top-0 left-0 bg-cyan-500/20 text-cyan-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-solid fa-file-code text-cyan-300 text-sm"></i> ReporteCafe.jrxml (Con Data Adapter "informacionCafe", Query SQL y Campo $F{variedad})
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-xml">&lt;!-- Created with Jaspersoft Studio version 7.0.8.final using JasperReports Library version 7.0.8-6f896111  --&gt;
+&lt;jasperReport name="ReporteCafe" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c1b52a78-9e11-4b16-928e-591b6190f84a"&gt;
+	&lt;property name="com.jaspersoft.studio.data.defaultdataadapter" value="informacionCafe"/&gt;
+	&lt;property name="com.jaspersoft.studio.data.sql.tables" value=""/&gt;
+	&lt;parameter name="anio" class="java.lang.String"&gt;
+		&lt;defaultValueExpression&gt;&lt;![CDATA["2026"]]&gt;&lt;/defaultValueExpression&gt;
+	&lt;/parameter&gt;
+	&lt;query language="SQL"&gt;&lt;![CDATA[SELECT C.IDCafe, C.Productor, VC.Descripcion AS Variedad, C.Cantidad
+FROM Cafe C INNER JOIN VariedadCafe VC
+ON C.VariedadCafe=VC.IDVariedad]]&gt;&lt;/query&gt;
+	&lt;field name="idcafe" class="java.lang.Integer"/&gt;
+	&lt;field name="productor" class="java.lang.String"/&gt;
+	&lt;field name="cantidad" class="java.lang.Float"/&gt;
+	&lt;field name="variedad" class="java.lang.String"/&gt;
+	&lt;title height="50"&gt;
+		&lt;element kind="textField" uuid="7cfd47c4-2792-411a-a681-ec06913e6d8a" x="0" y="10" width="555" height="30" fontSize="18.0" bold="true" hTextAlign="Center" vTextAlign="Middle"&gt;
+			&lt;expression&gt;&lt;![CDATA["Cafe reportes " + $P{anio}]]&gt;&lt;/expression&gt;
+		&lt;/element&gt;
+	&lt;/title&gt;
+	&lt;columnHeader height="30"&gt;
+		&lt;element kind="staticText" uuid="5fa7c3bc-1188-4c17-9154-2c0926d52671" x="0" y="0" width="100" height="25" fontSize="11.0" bold="true" hTextAlign="Center" vTextAlign="Middle"&gt;
+			&lt;box&gt;&lt;bottomPen lineWidth="1.0"/&gt;&lt;/box&gt;
+			&lt;text&gt;&lt;![CDATA[ID Café]]&gt;&lt;/text&gt;
+		&lt;/element&gt;
+		&lt;element kind="staticText" uuid="f9ea531b-417d-4c3e-8c65-27a4192b0051" x="100" y="0" width="180" height="25" fontSize="11.0" bold="true" hTextAlign="Left" vTextAlign="Middle"&gt;
+			&lt;box&gt;&lt;bottomPen lineWidth="1.0"/&gt;&lt;/box&gt;
+			&lt;text&gt;&lt;![CDATA[Productor]]&gt;&lt;/text&gt;
+		&lt;/element&gt;
+		&lt;element kind="staticText" uuid="68b64401-5bbd-48e8-975c-932198177e5c" x="280" y="0" width="120" height="25" fontSize="11.0" bold="true" hTextAlign="Left" vTextAlign="Middle"&gt;
+			&lt;box&gt;&lt;bottomPen lineWidth="1.0"/&gt;&lt;/box&gt;
+			&lt;text&gt;&lt;![CDATA[Variedad]]&gt;&lt;/text&gt;
+		&lt;/element&gt;
+		&lt;element kind="staticText" uuid="c08e58a7-3ce9-4a0b-967f-4775e53303c2" x="400" y="0" width="155" height="25" fontSize="11.0" bold="true" hTextAlign="Right" vTextAlign="Middle"&gt;
+			&lt;box&gt;&lt;bottomPen lineWidth="1.0"/&gt;&lt;/box&gt;
+			&lt;text&gt;&lt;![CDATA[Cantidad]]&gt;&lt;/text&gt;
+		&lt;/element&gt;
+	&lt;/columnHeader&gt;
+	&lt;detail&gt;
+		&lt;band height="25"&gt;
+			&lt;element kind="textField" uuid="7ab4a530-eb3d-4c7b-bf2d-7bb2157a9228" x="0" y="0" width="100" height="20" hTextAlign="Center" vTextAlign="Middle"&gt;
+				&lt;expression&gt;&lt;![CDATA[$F{idcafe}]]&gt;&lt;/expression&gt;
+			&lt;/element&gt;
+			&lt;element kind="textField" uuid="09ef0a4a-0a25-4fc1-a9f7-6d65377f0fc1" x="100" y="0" width="180" height="20" hTextAlign="Left" vTextAlign="Middle"&gt;
+				&lt;expression&gt;&lt;![CDATA[$F{productor}]]&gt;&lt;/expression&gt;
+			&lt;/element&gt;
+			&lt;element kind="textField" uuid="80786793-26c7-4498-91f5-98507e1930fc" x="280" y="0" width="120" height="20" hTextAlign="Left" vTextAlign="Middle"&gt;
+				&lt;expression&gt;&lt;![CDATA[$F{variedad}]]&gt;&lt;/expression&gt;
+			&lt;/element&gt;
+			&lt;element kind="textField" uuid="b5a198c9-9ebc-4c49-9831-5079a4c861ea" x="400" y="0" width="155" height="20" pattern="#,##0.00" hTextAlign="Right" vTextAlign="Middle"&gt;
+				&lt;expression&gt;&lt;![CDATA[$F{cantidad}]]&gt;&lt;/expression&gt;
+			&lt;/element&gt;
+		&lt;/band&gt;
+	&lt;/detail&gt;
+&lt;/jasperReport&gt;</code></pre>
+</div>
+
+<!-- PASO 4: TODO DENTRO DE INTELLIJ IDEA -->
+<h3 class="text-2xl font-bold text-emerald-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-laptop-code text-emerald-400"></i> 4. Todo dentro de IntelliJ IDEA: Parámetros, Conexión y <code>AdmonReporte</code>
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Ahora veamos exactamente qué se pasa como parámetro en <code>JasperFillManager.fillReport(...)</code> dentro de IntelliJ IDEA. El método recibe <strong>3 argumentos</strong>:
+</p>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="glass p-4 rounded-xl border-t-4 border-t-rose-500">
+        <div class="text-xs font-mono text-rose-400 mb-1">ARGUMENTO 1: sourceFileName</div>
+        <h4 class="font-bold text-white text-sm mb-1"><code>"ReporteCafeSQL.jasper"</code></h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Ruta relativa al archivo binario <code>.jasper</code> ubicado en la raíz del proyecto IntelliJ.
+        </p>
+    </div>
+
+    <div class="glass p-4 rounded-xl border-t-4 border-t-amber-500">
+        <div class="text-xs font-mono text-amber-400 mb-1">ARGUMENTO 2: params (<code>Map&lt;String, Object&gt;</code>)</div>
+        <h4 class="font-bold text-white text-sm mb-1"><code>parametros</code> o <code>null</code></h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Un <code>HashMap</code> donde la clave coincide con el nombre del parámetro en Jaspersoft (ej. <code>parametros.put("anio", "2067")</code> para <code>$P{anio}</code>). Si pasas <code>null</code>, Jasper usa el <code>defaultValueExpression</code> (<code>"2026"</code>).
+        </p>
+    </div>
+
+    <div class="glass p-4 rounded-xl border-t-4 border-t-emerald-500">
+        <div class="text-xs font-mono text-emerald-400 mb-1">ARGUMENTO 3: connection (<code>java.sql.Connection</code>)</div>
+        <h4 class="font-bold text-white text-sm mb-1"><code>datos.getConexion()</code></h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            ¡El cambio clave! En vez de pasar una lista, le pasamos la <strong>conexión JDBC del Singleton</strong>. Jasper ejecuta internamente el <code>SELECT ... INNER JOIN</code> sobre esa conexión.
+        </p>
+    </div>
+</div>
+
+<!-- 4A: EJEMPLOJASPER.JAVA ACTUALIZADO -->
+<h4 class="text-lg font-bold text-white mb-3 mt-6 flex items-center gap-2">
+    <span class="bg-emerald-500/20 text-emerald-400 px-2.5 py-0.5 rounded text-xs font-mono">A</span>
+    Prueba Directa y Exportación a PDF en <code>EjemploJasper.java</code>
+</h4>
+
+<p class="text-slate-300 mb-3 text-xs leading-relaxed">
+    Observa cómo en <code>EjemploJasper.java</code> se comentaron las líneas antiguas de <code>JRBeanCollectionDataSource</code>, se creó el mapa <code>parametros</code> pasando <code>"anio" &rarr; "2067"</code>, se pasó <code>conexion</code> a <code>fillReport</code> y además se usó <code>JasperExportManager.exportReportToPdfFile(reporte, "ReporteCafe.pdf")</code> para generar el PDF directo en la raíz del proyecto:
+</p>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-emerald-300 text-sm"></i> src/main/java/EjemploJasper/EjemploJasper.java
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">package EjemploJasper;
+
+import com.example.basedatos.ADMON.AdmonCafe;
+import com.example.basedatos.ADMON.Datos;
+import com.example.basedatos.POJO.Cafe;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.view.JasperViewer;
+
+import java.sql.Connection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+
+public class EjemploJasper {
+    public static void main(String[] args){
+        try {
+            AdmonCafe admon = new AdmonCafe();
+            LinkedList&lt;Cafe&gt; cafes = admon.obtenerCafe();
+
+            for(Cafe cafe : cafes){
+                System.out.println(cafe);
+            }
+
+            // 1. Mapa de parámetros: la clave "anio" inyecta el valor en $P{anio} del reporte
+            Map&lt;String, Object&gt; parametros = new HashMap&lt;&gt;();
+            parametros.put("anio", "2067");
+
+            //JRBeanCollectionDataSource datos = new JRBeanCollectionDataSource(cafes);
+            // 2. Obtenemos la conexión activa a la BD desde nuestro Singleton Datos
+            Connection conexion = Datos.getInstance().getConexion();
+
+            //JasperPrint reporte = JasperFillManager.fillReport("ReporteCafe.jasper", parametros, datos);
+            // 3. Pasamos (archivo .jasper, mapa de parámetros, objeto Connection)
+            JasperPrint reporte = JasperFillManager.fillReport("ReporteCafe.jasper", parametros, conexion);
+
+            // 4. Exporta automáticamente el reporte lleno a un archivo PDF físico
+            JasperExportManager.exportReportToPdfFile(reporte, "ReporteCafe.pdf");
+
+            // 5. Muestra la ventana de vista previa sin matar la app al cerrar (false)
+            JasperViewer vista = new JasperViewer(reporte, false);
+            vista.setVisible(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+</div>
+
+<!-- 4B: CLASE ADMONREPORTE.JAVA -->
+<h4 class="text-lg font-bold text-white mb-3 mt-8 flex items-center gap-2">
+    <span class="bg-purple-500/20 text-purple-400 px-2.5 py-0.5 rounded text-xs font-mono">B</span>
+    Arquitectura Limpia: Clase <code>AdmonReporte.java</code> en el Paquete <code>ADMON</code>
+</h4>
+
+<p class="text-slate-300 mb-3 text-xs leading-relaxed">
+    Para integrar los reportes dentro de la aplicación JavaFX respetando la arquitectura en capas del proyecto, creamos la clase administradora <strong><code>AdmonReporte.java</code></strong> dentro de <code>com.example.basedatos.ADMON</code>. Esta clase encapsula la llamada a <code>Datos.getInstance()</code> y devuelve el objeto <code>JasperPrint</code> listo para mostrarse:
+</p>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-purple-500/20 text-purple-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-purple-300 text-sm"></i> src/main/java/com/example/basedatos/ADMON/AdmonReporte.java
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">package com.example.basedatos.ADMON;
+
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+
+public class AdmonReporte {
+    private Datos datos;
+
+    public AdmonReporte(){
+        try{
+            datos = Datos.getInstance();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public JasperPrint reporteCafes(){
+        try {
+            // Pasamos el archivo compilado con SQL, null en parámetros (usa el default "2026")
+            // y la conexión JDBC (datos.getConexion())
+            return JasperFillManager.fillReport("ReporteCafeSQL.jasper", null, datos.getConexion());
+        } catch (JRException e) {
+            System.err.println(e.getMessage());
+        }
+        return null;
+    }
+}</code></pre>
+</div>
+
+<!-- 4C: BOTÓN EN JAVAFX (CAFE.FXML Y CAFECONTROLLER.JAVA) -->
+<h4 class="text-lg font-bold text-white mb-3 mt-8 flex items-center gap-2">
+    <span class="bg-blue-500/20 text-blue-400 px-2.5 py-0.5 rounded text-xs font-mono">C</span>
+    Conectar el Botón <code>Reporte</code> en Scene Builder (<code>cafe.fxml</code>) y <code>CafeController.java</code>
+</h4>
+
+<p class="text-slate-300 mb-3 text-xs leading-relaxed">
+    Por último, agregamos un cuarto botón <strong>"Reporte"</strong> con el evento <code>onAction="#clicReporte"</code> en nuestra vista <code>cafe.fxml</code> y programamos su controlador en <code>CafeController.java</code>:
+</p>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <div class="code-wrapper relative pt-6">
+        <div class="absolute top-0 left-0 bg-blue-500/20 text-blue-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-solid fa-code text-blue-300 text-sm"></i> cafe.fxml (Botón con onAction="#clicReporte")
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-xml">&lt;Button layoutY="140.0" mnemonicParsing="false"
+        onAction="#clicAgregar" text="Agregar" /&gt;
+&lt;Button layoutX="78.0" layoutY="140.0" mnemonicParsing="false"
+        onAction="#clicEditar" text="Editar" /&gt;
+&lt;Button layoutX="144.0" layoutY="140.0" mnemonicParsing="false"
+        onAction="#clicBorrar" text="Borrar" /&gt;
+&lt;!-- Nuevo botón para disparar el reporte desde JavaFX --&gt;
+&lt;Button layoutX="205.0" layoutY="140.0" mnemonicParsing="false"
+        onAction="#clicReporte" text="Reporte" /&gt;</code></pre>
+    </div>
+
+    <div class="code-wrapper relative pt-6">
+        <div class="absolute top-0 left-0 bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-brands fa-java text-emerald-300 text-sm"></i> CafeController.java (Método clicReporte)
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">import com.example.basedatos.ADMON.AdmonReporte;
+import net.sf.jasperreports.view.JasperViewer;
+
+// ... dentro de CafeController:
+
+@FXML
+public void clicReporte(ActionEvent actionEvent){
+    AdmonReporte reportes = new AdmonReporte();
+    // false = al cerrar el visor de Jasper NO se cierra la ventana de JavaFX
+    JasperViewer vista = new JasperViewer(reportes.reporteCafes(), false);
+    vista.setVisible(true);
+}</code></pre>
+    </div>
+</div>
+
+<!-- RESUMEN VISUAL DE ARCHIVOS EN LA RAÍZ DEL PROYECTO -->
+<div class="glass p-6 rounded-xl border-l-4 border-l-amber-500 mb-6">
+    <h4 class="font-bold text-amber-300 mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-folder-open text-amber-400"></i> Checklist Final: ¿Dónde van los archivos en IntelliJ IDEA?
+    </h4>
+    <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside leading-relaxed">
+        <li><code>informacion.db</code>, <code>ReporteCafe.jrxml</code>, <code>ReporteCafe.jasper</code> y <code>ReporteCafeSQL.jasper</code> deben estar directamente en la <strong>raíz del proyecto</strong> (afuera de <code>src/</code>, al mismo nivel que <code>pom.xml</code>).</li>
+        <li>En <strong>Jaspersoft Studio</strong> el Data Adapter usa la ruta completa al archivo (<code>jdbc:sqlite:C:/.../baseDatos/informacion.db</code>) y tiene el <code>.jar</code> de Maven cargado en la pestaña <strong>Driver Classpath</strong>.</li>
+        <li>En <strong>IntelliJ IDEA</strong> no importa en qué computadora se abra el proyecto: aunque el reporte <code>.jrxml</code> diga <code>defaultdataadapter="informacionCafe"</code>, cuando llamas a <code>JasperFillManager.fillReport("ReporteCafeSQL.jasper", null, datos.getConexion())</code> desde Java, <strong>Jasper ignora la ruta fija del adaptador y usa la conexión dinámica de tu clase <code>Datos.java</code></strong> (MySQL o SQLite local).</li>
+    </ul>
+</div>

@@ -1,0 +1,115 @@
+/* Estilos principales */
+
+:root {
+    --bg-color: #0b0f19;
+    --glass-bg: rgba(17, 25, 40, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --primary: #3b82f6;
+    --accent: #10b981;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-color);
+    color: #e2e8f0;
+    overflow: hidden; /* Evita scroll general, se maneja por columnas */
+}
+
+h1, h2, h3, h4, .font-outfit { font-family: 'Outfit', sans-serif; }
+code, pre { font-family: 'Fira Code', monospace; }
+
+.glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-right: 1px solid var(--glass-border);
+}
+
+.tab-content {
+    display: none;
+    opacity: 0;
+    animation: fadeIn 0.4s ease-in-out forwards;
+}
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.custom-scrollbar::-webkit-scrollbar { width: 8px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+.btn-tab.active {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, transparent 100%);
+    border-left: 4px solid var(--primary);
+    color: #60a5fa;
+    font-weight: 600;
+}
+
+.btn-tab {
+    border-left: 4px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.highlight-box {
+    border-left: 4px solid var(--accent);
+    background: rgba(16, 185, 129, 0.05);
+}
+
+/* Notificación Toast (Mensaje de Copiado) */
+#toast {
+    visibility: hidden;
+    min-width: 250px;
+    background-color: var(--primary);
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 12px 20px;
+    position: fixed;
+    z-index: 50;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s, bottom 0.3s;
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.5);
+    font-weight: 600;
+}
+#toast.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 50px;
+}
+
+/* Botón de copiar en bloques de código */
+.code-wrapper {
+    position: relative;
+}
+.copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.2s;
+    opacity: 0;
+    backdrop-filter: blur(4px);
+}
+.code-wrapper:hover .copy-btn {
+    opacity: 1;
+}
+.copy-btn:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+}

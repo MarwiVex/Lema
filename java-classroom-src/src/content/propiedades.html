@@ -1,0 +1,210 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-amber-500/20 text-amber-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-sliders"></i></span>
+    16. Archivos de Propiedades (<code>.properties</code>) y <code>Locale</code>
+</h2>
+
+<p class="text-slate-300 mb-8 text-base leading-relaxed">
+    Nunca debes escribir contraseñas, URLs de servidores o parámetros de configuración directamente quemados (<em>hardcoded</em>) dentro de tus clases Java. Si la dirección de la base de datos cambia en producción, tendrías que recompilar todo el proyecto. Para resolver esto, Java incluye la clase <code>java.util.Properties</code> y el manejo de configuración regional con <code>java.util.Locale</code>.
+</p>
+
+<!-- 1. QUÉ ES UN ARCHIVO .PROPERTIES -->
+<h3 class="text-2xl font-bold text-amber-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-file-lines text-amber-400"></i> 1. Estructura de un Archivo <code>.properties</code>
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Un archivo <code>.properties</code> es un fichero de texto plano donde cada línea almacena un par <code>clave=valor</code>. Las líneas que comienzan con almohadilla (<code>#</code>) son comentarios ignorados por Java. En el proyecto <strong>BaseDatos</strong> se utilizan dos archivos clave:
+</p>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="code-wrapper relative pt-6">
+        <div class="absolute top-0 left-0 bg-amber-500/20 text-amber-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-solid fa-gear text-amber-300 text-sm"></i> config.properties (En la raíz del proyecto)
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-ini">#pues chad no?
+#Sun Nov 08 21:20:36 CST 2026
+app.debug=true
+app.nombre=Skibidi app
+app.version=67.67.1</code></pre>
+    </div>
+
+    <div class="code-wrapper relative pt-6">
+        <div class="absolute top-0 left-0 bg-cyan-500/20 text-cyan-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-solid fa-database text-cyan-300 text-sm"></i> src/main/resources/database.properties
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-ini"># Configuracion de conexion a la base de datos MySQL (Servidor)
+db.url=jdbc:mysql://localhost:3306/informacion_db
+db.user=root
+db.password=
+
+# Configuracion de conexion local de respaldo (SQLite)
+db.local.url=jdbc:sqlite:informacion.db</code></pre>
+    </div>
+</div>
+
+<!-- 2. CREAR Y GUARDAR PROPIEDADES -->
+<h3 class="text-2xl font-bold text-emerald-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-floppy-disk text-emerald-400"></i> 2. Crear y Guardar un Archivo <code>.properties</code> desde Java
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Con <code>setProperty(clave, valor)</code> defines las claves en memoria y con <code>store(FileOutputStream, comentario)</code> generas automáticamente el archivo físico en disco incluyendo la fecha y el comentario de cabecera:
+</p>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-emerald-300 text-sm"></i> CrearPropiedad.java (Proyecto BaseDatos)
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">package com.example.basedatos.Propiedades;
+
+import java.io.FileOutputStream;
+import java.util.Properties;
+
+public class CrearPropiedad {
+    public static void main(String[] args) {
+        Properties propiedad = new Properties();
+        
+        // Asignamos pares clave -> valor (siempre como Strings)
+        propiedad.setProperty("app.nombre", "Skibidi app");
+        propiedad.setProperty("app.version", "67.67.1");
+        propiedad.setProperty("app.debug", "true");
+
+        // try-with-resources cierra el FileOutputStream automáticamente
+        try (FileOutputStream fos = new FileOutputStream("config.properties")) {
+            propiedad.store(fos, "pues chad no?");
+            System.out.println("Archivo config.properties generado con éxito.");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+}</code></pre>
+</div>
+
+<!-- 3. LEER PROPIEDADES -->
+<h3 class="text-2xl font-bold text-sky-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-folder-open text-sky-400"></i> 3. Cargar Propiedades: Disco vs Classpath (<code>resources</code>)
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Existen dos maneras de leer un archivo <code>.properties</code> dependiendo de dónde esté ubicado:
+</p>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <div class="glass p-5 rounded-xl border border-sky-500/30">
+        <h4 class="font-bold text-sky-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-hard-drive text-sky-400"></i> A. Con <code>FileInputStream</code> (Raíz del proyecto)
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Ideal cuando el archivo <code>config.properties</code> está fuera del JAR (en la carpeta de trabajo del usuario) y quieres que pueda modificarse y guardarse en tiempo de ejecución.
+        </p>
+    </div>
+    <div class="glass p-5 rounded-xl border border-purple-500/30">
+        <h4 class="font-bold text-purple-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-box-archive text-purple-400"></i> B. Con <code>getResourceAsStream</code> (Carpeta <code>resources</code>)
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Ideal cuando el archivo (como <code>/database.properties</code>) vive dentro de <code>src/main/resources</code> y viaja empaquetado dentro del ejecutable o classpath de Maven.
+        </p>
+    </div>
+</div>
+
+<div class="code-wrapper relative pt-6 mb-6">
+    <div class="absolute top-0 left-0 bg-sky-500/20 text-sky-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-sky-300 text-sm"></i> CargarPropiedades.java (Lectura y parseo de tipos)
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">package com.example.basedatos.Propiedades;
+
+import java.io.FileInputStream;
+import java.util.Properties;
+
+public class CargarPropiedades {
+    public static void main(String[] args) {
+        String nombre = "";
+        String version = "";
+        Boolean debug = true;
+        Properties propiedad = new Properties();
+
+        try (FileInputStream fis = new FileInputStream("config.properties")) {
+            propiedad.load(fis);
+            nombre = propiedad.getProperty("app.nombre");
+            version = propiedad.getProperty("app.version");
+            // Como getProperty devuelve String, convertimos a boolean con Boolean.parseBoolean
+            debug = Boolean.parseBoolean(propiedad.getProperty("app.debug"));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+
+        System.out.printf("%s %s %b%n", nombre, version, debug);
+    }
+}</code></pre>
+</div>
+
+<div class="glass p-5 rounded-xl border-l-4 border-l-purple-500 mb-8">
+    <h4 class="font-bold text-purple-300 mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-shield-halved text-purple-400"></i> Uso de Valores por Defecto (Fallback) en <code>getProperty</code>
+    </h4>
+    <p class="text-xs text-slate-300 leading-relaxed mb-3">
+        El método sobrecargado <code>propiedades.getProperty("clave", "valorPorDefecto")</code> devuelve el segundo argumento si la clave no existe en el archivo. En <code>Datos.java</code> se encadena para soportar distintos nombres de clave o un valor de respaldo seguro:
+    </p>
+    <div class="bg-black/60 p-3 rounded-lg font-mono text-xs text-slate-200">
+        String urlServer = propiedades.getProperty(<span class="text-emerald-300">"db.url"</span>, propiedades.getProperty(<span class="text-emerald-300">"url"</span>, <span class="text-amber-300">"jdbc:mysql://localhost:3306/informacion_db"</span>));<br>
+        String user = propiedades.getProperty(<span class="text-emerald-300">"db.user"</span>, <span class="text-amber-300">"root"</span>);<br>
+        String urlLocal = propiedades.getProperty(<span class="text-emerald-300">"db.local.url"</span>, <span class="text-amber-300">"jdbc:sqlite:informacion.db"</span>);
+    </div>
+</div>
+
+<!-- 4. CONFIGURACIÓN REGIONAL (LOCALE) Y EL PROBLEMA DEL PUNTO DECIMAL EN SQL -->
+<h3 class="text-2xl font-bold text-rose-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-earth-americas text-rose-400"></i> 4. <code>java.util.Locale</code> y el Peligro de <code>%f</code> en Consultas SQL
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    La clase <code>Locale</code> define la convención regional e idioma de la JVM (formato de fechas, monedas y <strong>separador decimal</strong>). Observa el experimento del archivo <code>EjemploLocales.java</code> del repositorio <strong>BaseDatos</strong>:
+</p>
+
+<div class="code-wrapper relative pt-6 mb-6">
+    <div class="absolute top-0 left-0 bg-rose-500/20 text-rose-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-rose-300 text-sm"></i> EjemploLocales.java (Proyecto BaseDatos)
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">package com.example.basedatos.Locales;
+
+import java.util.Locale;
+
+public class EjemploLocales {
+    public static void main(String[] args) {
+        float valor = 1.5f;
+
+        // En España (es_ES) y varios países hispanohablantes, el separador decimal es la COMA (,)
+        Locale.setDefault(new Locale("es", "ES"));
+        System.out.println("Con Locale es_ES: " + String.format("%f", valor)); // Imprime: 1,500000
+
+        // En EE.UU. (en_US) y México (es_MX), el separador decimal es el PUNTO (.)
+        Locale.setDefault(Locale.US);
+        System.out.println("Con Locale US:    " + String.format("%f", valor)); // Imprime: 1.500000
+    }
+}</code></pre>
+</div>
+
+<div class="glass p-6 rounded-xl border-l-4 border-l-rose-500 mb-8">
+    <h4 class="font-bold text-rose-400 mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-bug"></i> ¿Por qué <code>Locale</code> puede romper tus <code>INSERT</code> o <code>UPDATE</code> en SQL?
+    </h4>
+    <p class="text-xs text-slate-300 leading-relaxed mb-3">
+        En <code>AdmonCafe.java</code>, la consulta SQL se construye con <code>String.format</code>:
+    </p>
+    <div class="bg-black/60 p-3 rounded-lg font-mono text-xs text-slate-200 mb-3">
+        String consulta = String.format(<span class="text-emerald-300">"INSERT INTO Cafe(Productor, VariedadCafe, Cantidad) VALUES('%s', %d, %f)"</span>, productor, variedad, cantidad);
+    </div>
+    <p class="text-xs text-slate-300 leading-relaxed">
+        Si la PC donde corre el programa tiene <code>Locale("es", "ES")</code>, entonces <code>%f</code> convierte <code>2.5f</code> en <code>2,500000</code> (con coma). La consulta resultante será:<br>
+        <code class="text-rose-300">INSERT INTO Cafe(Productor, VariedadCafe, Cantidad) VALUES('FincaSol', 1, 2,500000)</code><br>
+        ¡SQL interpretará la coma de <code>2,500000</code> como un <strong>cuarto valor separado</strong> y lanzará un <code>SQLException: column count doesn't match value count</code>!
+        <br><br>
+        <strong class="text-emerald-400">Soluciones:</strong> Pasar explícitamente <code>String.format(Locale.US, "INSERT ...", ...)</code>, configurar <code>Locale.setDefault(Locale.US)</code> al inicio del programa, o utilizar parámetros <code>?</code> con <code>PreparedStatement.setFloat()</code>.
+    </p>
+</div>

@@ -1,0 +1,86 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-blue-500/20 text-blue-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-4"></i></span>
+    Matrices y Copias
+</h2>
+
+<p class="text-slate-300 mb-6 text-base leading-relaxed">
+    Llegamos al tema donde la mayoría tropieza. En Java, <strong>NO EXISTEN las matrices de verdad</strong>. Es decir, no reserva un cuadro perfecto en memoria. Lo que hace Java es crear <strong>"Arreglos que apuntan a otros arreglos"</strong> (Jagged Arrays o Arreglos Escalonados).
+</p>
+
+<h3 class="text-xl font-bold text-blue-300 mb-3">Construyendo una Matriz</h3>
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Instancias un arreglo "maestro" (las filas). Luego, a cada espacio de ese arreglo le insertas otro arreglo (las columnas). Esto permite que cada fila pueda tener un tamaño diferente.
+</p>
+
+<div class="code-wrapper mb-10">
+    <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl shadow-lg border border-white/10 m-0"><code class="language-java">public class matriz {
+    public static void main(String[] args){
+        // Arreglo maestro de 3 filas. Columnas vacías.
+        int[][] datos = new int[3][];
+        
+        // Instanciamos manualmente las columnas de CADA fila.
+        datos[0] = new int[2];
+        datos[1] = new int[2];
+        datos[2] = new int[2];
+
+        int cont = 1;
+        // Llenado con for anidado usando .length
+        for (int i=0; i < datos.length; i++){
+            for (int j=0; j < datos[i].length; j++){
+                datos[i][j] = cont++;
+            }
+        }
+
+        // Impresión usando doble for-each
+        for (int[] fila : datos){          // Extrae arreglos (filas)
+            for(int dato : fila){          // Extrae enteros de cada fila
+                System.out.print(dato + "\t");
+            }
+            System.out.println();
+        }
+    }
+}</code></pre>
+</div>
+
+<div class="border-t border-white/10 my-10"></div>
+
+<h3 class="text-2xl font-bold text-rose-400 mb-3"><i class="fa-solid fa-triangle-exclamation mr-2"></i>El Peligro: La Copia Fantasma (Shallow Copy)</h3>
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Si tienes un arreglo de 1 dimensión y usas el método <code>.clone()</code>, hace una copia perfecta. Pero si tienes una matriz, <strong>¡es una trampa mortal!</strong> <br><br>
+    Al hacer <code>matriz.clone()</code>, Java copia la estructura principal (las filas), pero <strong>NO duplica la memoria de las columnas internas</strong>. 
+    Ambas matrices (original y copia) terminan compartiendo las mismas columnas en la RAM. Si alteras la copia, la original se muta mágicamente y tus datos colapsan.
+</p>
+
+<h3 class="text-2xl font-bold text-emerald-400 mb-3 mt-10"><i class="fa-solid fa-shield-halved mr-2"></i>Solución: La Copia Profunda (Deep Copy)</h3>
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Para crear una copia verdaderamente independiente y aislada de todo, tienes que decirle a Java que asigne memoria nueva a cada fila y luego copiar los números <em>uno por uno</em> manualmente con un <code>for</code>. 
+</p>
+
+<div class="code-wrapper mb-10">
+    <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl shadow-lg border border-emerald-500/30 m-0"><code class="language-java">public class copiaprofunda {
+    public static void main(String[] args){
+        int[][] original = {{1, 2}, {3, 4}};
+        
+        // --- COPIA PROFUNDA A MANO ---
+        // 1. Instanciamos el cascarón principal (Filas)
+        int[][] copiaLimpia = new int[original.length][]; 
+        
+        for (int i = 0; i < original.length; i++) {
+            // 2. Pedimos MEMORIA NUEVA para aislar la fila
+            copiaLimpia[i] = new int[original[i].length];
+            
+            // 3. Copiamos el número celda a celda
+            for (int j = 0; j < original[i].length; j++) {
+                copiaLimpia[i][j] = original[i][j];
+            }
+        }
+        
+        // ¡PRUEBA DE AISLAMIENTO!
+        copiaLimpia[0][0] = 999;
+        System.out.println("En Original hay: " + original[0][0]); // Imprime 1
+        System.out.println("En Copia Limpia hay: " + copiaLimpia[0][0]); // Imprime 999
+    }
+}</code></pre>
+</div>

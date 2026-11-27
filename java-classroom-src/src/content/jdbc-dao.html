@@ -1,0 +1,709 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-cyan-500/20 text-cyan-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-plug-circle-bolt"></i></span>
+    19. JDBC, Singleton y Arquitectura ADMON/DAO (MySQL + SQLite)
+</h2>
+
+<p class="text-slate-300 mb-8 text-base leading-relaxed">
+    <strong>JDBC (Java Database Connectivity)</strong> es la API oficial de Java (paquete <code>java.sql</code>) que permite que tu código se comunique con cualquier motor de base de datos relacional usando exactamente las mismas clases (<code>Connection</code>, <code>PreparedStatement</code>, <code>ResultSet</code>). En esta sección analizaremos a fondo la arquitectura completa del repositorio <strong>BaseDatos</strong>.
+</p>
+
+<!-- 1. CONFIGURACIÓN MAVEN Y MODULE-INFO -->
+<h3 class="text-2xl font-bold text-cyan-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-puzzle-piece text-cyan-400"></i> 1. Dependencias Maven (Drivers JDBC) y <code>module-info.java</code>
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Para que `DriverManager` sepa cómo hablar con SQLite o con MySQL, debemos agregar sus conectores (drivers) en el archivo <code>pom.xml</code> y declarar <code>requires java.sql;</code> en <code>module-info.java</code>:
+</p>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <div class="code-wrapper relative pt-6">
+        <div class="absolute top-0 left-0 bg-cyan-500/20 text-cyan-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-solid fa-file-code text-cyan-300 text-sm"></i> pom.xml (Drivers SQLite y MySQL)
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-xml">&lt;!-- Conector JDBC para SQLite --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.xerial&lt;/groupId&gt;
+    &lt;artifactId&gt;sqlite-jdbc&lt;/artifactId&gt;
+    &lt;version&gt;3.47.0.0&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;!-- Logger requerido por sqlite-jdbc --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+    &lt;artifactId&gt;slf4j-simple&lt;/artifactId&gt;
+    &lt;version&gt;2.0.16&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;!-- Conector JDBC para MySQL / XAMPP --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.mysql&lt;/groupId&gt;
+    &lt;artifactId&gt;mysql-connector-j&lt;/artifactId&gt;
+    &lt;version&gt;8.4.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+    </div>
+
+    <div class="code-wrapper relative pt-6">
+        <div class="absolute top-0 left-0 bg-purple-500/20 text-purple-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-brands fa-java text-purple-300 text-sm"></i> module-info.java
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">module com.example.basedatos {
+    requires javafx.controls;
+    requires javafx.fxml;
+    requires java.sql; // Indispensable para JDBC
+    requires java.desktop;
+    requires net.sf.jasperreports.core;
+
+    opens com.example.basedatos.POJO;
+    exports com.example.basedatos.POJO;
+    opens com.example.basedatos.ADMON to javafx.base;
+    opens com.example.basedatos to javafx.fxml, javafx.base;
+    exports com.example.basedatos;
+    exports EjemploJasper;
+}</code></pre>
+    </div>
+</div>
+
+<!-- 2. LOS 4 PILARES DE JAVA.SQL -->
+<h3 class="text-2xl font-bold text-emerald-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-cubes-stacked text-emerald-400"></i> 2. Las 4 Clases Esenciales de <code>java.sql</code>
+</h3>
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+    <div class="glass p-4 rounded-xl border-t-4 border-t-cyan-500">
+        <h4 class="font-bold text-cyan-300 text-sm mb-1">1. DriverManager</h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Lee el prefijo de la URL (<code>jdbc:mysql:...</code> o <code>jdbc:sqlite:...</code>) y abre la conexión con <code>DriverManager.getConnection(...)</code>.
+        </p>
+    </div>
+    <div class="glass p-4 rounded-xl border-t-4 border-t-blue-500">
+        <h4 class="font-bold text-blue-300 text-sm mb-1">2. Connection</h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Representa la sesión activa con la BD. A partir de ella preparamos sentencias con <code>conexion.prepareStatement(sql)</code>.
+        </p>
+    </div>
+    <div class="glass p-4 rounded-xl border-t-4 border-t-emerald-500">
+        <h4 class="font-bold text-emerald-300 text-sm mb-1">3. PreparedStatement</h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Ejecuta consultas de lectura con <code>executeQuery()</code> (devuelve un <code>ResultSet</code>) o modificaciones con <code>execute()</code> / <code>executeUpdate()</code>.
+        </p>
+    </div>
+    <div class="glass p-4 rounded-xl border-t-4 border-t-amber-500">
+        <h4 class="font-bold text-amber-300 text-sm mb-1">4. ResultSet</h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Cursor que apunta a las filas devueltas por un <code>SELECT</code>. Se recorre con <code>while(rs.next())</code> extrayendo columnas con <code>getInt("col")</code>, <code>getString("col")</code>, etc.
+        </p>
+    </div>
+</div>
+
+<!-- 3. CLASE DATOS.JAVA: SINGLETON + FAILOVER HÍBRIDO MYSQL -> SQLITE -->
+<h3 class="text-2xl font-bold text-amber-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-shield-cat text-amber-400"></i> 3. <code>Datos.java</code>: Patrón Singleton con Failover Automático (MySQL &rarr; SQLite)
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Observa la elegancia de la clase <code>Datos.java</code> en el paquete <code>ADMON</code>:
+</p>
+<ul class="list-disc list-inside text-xs text-slate-300 space-y-2 mb-6">
+    <li><strong class="text-amber-300">Patrón Singleton:</strong> Su constructor es <code>private</code> y expone <code>Datos.getInstance()</code> para abrir una única conexión durante toda la ejecución.</li>
+    <li><strong class="text-emerald-300">Conexión Híbrida Resiliente (Failover):</strong> Primero intenta conectarse al servidor principal <strong>MySQL</strong> (<code>urlServer</code>). Si el servidor XAMPP está apagado o no hay red, captura el <code>SQLException</code> y en el bloque <code>catch</code> se conecta automáticamente a la base de datos local <strong>SQLite</strong> (<code>informacion.db</code>). ¡La aplicación sigue funcionando sin caerse!</li>
+</ul>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-amber-500/20 text-amber-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-amber-300 text-sm"></i> ADMON/Datos.java (Singleton + Failover MySQL a SQLite)
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">package com.example.basedatos.ADMON;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.*;
+import java.util.Properties;
+
+public class Datos {
+    private static Datos datos = null;
+    private Connection conexion;
+
+    private Datos() {
+        Properties propiedades = new Properties();
+        try (InputStream input = Datos.class.getResourceAsStream("/database.properties")) {
+            propiedades.load(input);
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
+
+        String urlServer = propiedades.getProperty("db.url", propiedades.getProperty("url", "jdbc:mysql://localhost:3306/informacion_db"));
+        String user = propiedades.getProperty("db.user", propiedades.getProperty("user", "root"));
+        String password = propiedades.getProperty("db.password", propiedades.getProperty("password", ""));
+        String urlLocal = propiedades.getProperty("db.local.url", propiedades.getProperty("db.url.local", "jdbc:sqlite:informacion.db"));
+
+        try {
+            // 1. Intentar conectar al servidor principal (MySQL)
+            conexion = DriverManager.getConnection(urlServer, user, password);
+            System.out.println("bd conectada al servidor (MySQL)");
+        } catch (SQLException e) {
+            System.err.println("MySQL no disponible (" + e.getMessage() + "). Conectando a SQLite local...");
+            try {
+                // 2. Respaldo automático: conectar al archivo local SQLite
+                conexion = DriverManager.getConnection(urlLocal);
+                System.out.println("bd conectada en modo local (SQLite)");
+            } catch (SQLException ex) {
+                System.err.println(ex.getMessage());
+            }
+        }
+    }
+
+    public static Datos getInstance() {
+        if (datos == null) {
+            datos = new Datos();
+        }
+        return datos;
+    }
+
+    // Para sentencias SELECT (devuelve las filas en un ResultSet)
+    public ResultSet ejecutarConsulta(String consulta) {
+        ResultSet resultado = null;
+        try {
+            resultado = this.conexion.prepareStatement(consulta).executeQuery();
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        return resultado;
+    }
+
+    // Para sentencias INSERT, UPDATE o DELETE
+    public boolean ejecutarInstruccion(String consulta) {
+        try {
+            this.conexion.prepareStatement(consulta).execute();
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        return true;
+    }
+
+    public Connection getConexion() {
+        return this.conexion;
+    }
+}</code></pre>
+</div>
+
+<!-- 4. DEMOSTRACIÓN DE SINGLETON CON EJEMPLOMYSQL.JAVA -->
+<h3 class="text-2xl font-bold text-sky-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-vial-circle-check text-sky-400"></i> 4. Prueba del Singleton con <code>DatosMYSQL.java</code> y <code>EjemploMYSQL.java</code>
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Observa cómo <code>EjemploMYSQL.java</code> solicita 10 veces la conexión dentro de un bucle y comprueba con <code>stream().allMatch(...)</code> que las 10 referencias apuntan exactamente al mismo objeto <code>Connection</code>:
+</p>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-sky-500/20 text-sky-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-sky-300 text-sm"></i> EjemploMYSQL.java (Comprobación de instancia única)
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">package com.example.basedatos;
+
+import java.sql.Connection;
+import java.util.LinkedList;
+import java.util.Scanner;
+
+public class EjemploMYSQL {
+    public static void main(String[] args) {
+        try {
+            LinkedList<Connection> conexiones = new LinkedList<>();
+
+            System.out.println("=== Probando el modelo Singleton con DatosMYSQL ===");
+            for (int i = 0; i < 10; i++) {
+                // Obtenemos la conexión a través de la instancia Singleton
+                Connection con = DatosMYSQL.getInstance().getConexion();
+                conexiones.add(con);
+                System.out.println("Iteración " + (i + 1) + " -> Referencia de conexión: " + con);
+            }
+
+            if (!conexiones.isEmpty() && conexiones.getFirst() != null) {
+                boolean todasIguales = conexiones.stream().allMatch(c -> c == conexiones.getFirst());
+                System.out.println("¿Todas las referencias son exactamente la misma instancia?: " + todasIguales);
+            }
+
+            System.out.println("Presiona ENTER para cerrar la conexión y salir...");
+            new Scanner(System.in).nextLine();
+
+            if (DatosMYSQL.getInstance().getConexion() != null && !DatosMYSQL.getInstance().getConexion().isClosed()) {
+                DatosMYSQL.getInstance().getConexion().close();
+                System.out.println("Conexión cerrada exitosamente.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+</div>
+
+<!-- 5. CAPA POJO Y CAPA ADMON (DAO) -->
+<h3 class="text-2xl font-bold text-purple-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-layer-group text-purple-400"></i> 5. Separación en Capas: POJOs, Clase Administradora (<code>AdmonCafe</code>) y Controlador JavaFX
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Un proyecto limpio nunca mezcla sentencias SQL dentro de los botones de la interfaz gráfica. En su lugar, divide el código en tres capas:
+</p>
+<ol class="list-decimal list-inside text-xs text-slate-300 space-y-1 mb-6">
+    <li><strong class="text-cyan-300">Paquete <code>POJO</code> (<code>Cafe.java</code>, <code>VariedadCafe.java</code>):</strong> Clases simples con atributos, constructores, getters/setters y <code>toString()</code> que representan una fila de cada tabla.</li>
+    <li><strong class="text-purple-300">Paquete <code>ADMON</code> (<code>AdmonCafe.java</code>, <code>AdmonVariedadCafe.java</code>):</strong> Clases administradoras (Data Access Objects) que traducen objetos Java en sentencias <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code> y convierten el <code>ResultSet</code> de <code>SELECT</code> en una <code>LinkedList&lt;Cafe&gt;</code>.</li>
+    <li><strong class="text-emerald-300">Controlador JavaFX (<code>CafeController.java</code>):</strong> Gestiona los eventos de la vista y llama a los métodos de <code>AdmonCafe</code>.</li>
+</ol>
+
+<div class="code-wrapper relative pt-6 mb-6">
+    <div class="absolute top-0 left-0 bg-purple-500/20 text-purple-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-purple-300 text-sm"></i> ADMON/AdmonCafe.java (CRUD completo contra la BD)
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">package com.example.basedatos.ADMON;
+
+import com.example.basedatos.POJO.Cafe;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.LinkedList;
+
+public class AdmonCafe {
+    private Datos datos;
+
+    public AdmonCafe() {
+        datos = Datos.getInstance();
+    }
+
+    public void agregar(Cafe cafe) throws Exception {
+        String consulta = String.format(
+            "INSERT INTO Cafe(Productor, VariedadCafe, Cantidad) VALUES('%s', %d, %f)",
+            cafe.getProductor(), cafe.getVariedadCafe(), cafe.getCantidad()
+        );
+        datos.ejecutarInstruccion(consulta);
+    }
+
+    public void editar(Cafe cafe) throws Exception {
+        String consulta = String.format(
+            "UPDATE Cafe SET Productor='%s', VariedadCafe=%d, Cantidad=%f WHERE IDCafe=%d",
+            cafe.getProductor(), cafe.getVariedadCafe(), cafe.getCantidad(), cafe.getIdcafe()
+        );
+        datos.ejecutarInstruccion(consulta);
+    }
+
+    public void borrar(Integer idCafe) throws Exception {
+        String consulta = String.format("DELETE FROM Cafe WHERE IDCafe=%d", idCafe);
+        datos.ejecutarInstruccion(consulta);
+    }
+
+    public LinkedList<Cafe> obtenerCafe() throws Exception {
+        LinkedList<Cafe> Cafes = new LinkedList<>();
+        String consulta = "SELECT * FROM Cafe";
+        try {
+            ResultSet resultado = datos.ejecutarConsulta(consulta);
+            if (resultado != null) {
+                // Avanzamos fila por fila con resultado.next()
+                while (resultado.next()) {
+                    Cafes.add(new Cafe(
+                        resultado.getInt("IDCafe"),
+                        resultado.getString("Productor"),
+                        resultado.getInt("VariedadCafe"),
+                        resultado.getFloat("Cantidad")
+                    ));
+                }
+                resultado.close(); // Importante liberar el cursor al terminar
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al cargar Cafes: " + e.getMessage());
+        }
+        return Cafes;
+    }
+}</code></pre>
+</div>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-emerald-300 text-sm"></i> CafeController.java (Integración de TableView, ComboBox y AdmonCafe)
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">package com.example.basedatos;
+
+import com.example.basedatos.ADMON.AdmonCafe;
+import com.example.basedatos.ADMON.AdmonVariedadCafe;
+import com.example.basedatos.POJO.Cafe;
+import com.example.basedatos.POJO.VariedadCafe;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
+import java.net.URL;
+import java.util.ResourceBundle;
+
+public class CafeController implements Initializable {
+    @FXML private TextField textFieldID;
+    @FXML private TextField textFieldProductor;
+    @FXML private TextField textFieldCantidad;
+    @FXML private ComboBox<VariedadCafe> comboVariedad;
+    @FXML private TableView<Cafe> tablaCafe;
+
+    private AdmonCafe AdministradorCafe = new AdmonCafe();
+    private AdmonVariedadCafe Variedad = new AdmonVariedadCafe();
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        inicializarTabla();
+        try {
+            // Poblar el ComboBox con las variedades desde la tabla VariedadCafe
+            comboVariedad.getItems().setAll(Variedad.obtenerVariedadCafe());
+        } catch (Exception e) {
+            System.err.println("Error al cargar variedades: " + e.getMessage());
+        }
+        cargarTabla();
+    }
+
+    private void inicializarTabla() {
+        TableColumn<Cafe, Integer> tcID = new TableColumn<>("ID");
+        TableColumn<Cafe, String> tcProductor = new TableColumn<>("Productor");
+        TableColumn<Cafe, Integer> tcVariedadID = new TableColumn<>("VariedadID");
+        TableColumn<Cafe, Float> tcCantidad = new TableColumn<>("Cantidad");
+
+        tcID.setCellValueFactory(new PropertyValueFactory<>("IDCafe"));
+        tcProductor.setCellValueFactory(new PropertyValueFactory<>("Productor"));
+        tcVariedadID.setCellValueFactory(new PropertyValueFactory<>("VariedadCafe"));
+        tcCantidad.setCellValueFactory(new PropertyValueFactory<>("Cantidad"));
+
+        tablaCafe.getColumns().setAll(tcID, tcProductor, tcVariedadID, tcCantidad);
+    }
+
+    // Al hacer clic en una fila de la tabla, rellenamos los TextField y seleccionamos su Variedad en el ComboBox
+    public void clicInformacion(MouseEvent mouseEvent) {
+        Cafe cafe = tablaCafe.getSelectionModel().getSelectedItem();
+        if (cafe == null) return;
+
+        textFieldID.setText(String.valueOf(cafe.getIdcafe()));
+        textFieldProductor.setText(cafe.getProductor());
+        textFieldCantidad.setText(String.valueOf(cafe.getCantidad()));
+
+        for (VariedadCafe variedad : comboVariedad.getItems()) {
+            if (variedad.getIDVariedad().equals(cafe.getVariedadCafe())) {
+                comboVariedad.getSelectionModel().select(variedad);
+            }
+        }
+    }
+
+    public void clicAgregar(ActionEvent actionEvent) {
+        Cafe cafe = new Cafe(
+            null, // El ID es autoincremental en la BD
+            textFieldProductor.getText(),
+            comboVariedad.getSelectionModel().getSelectedItem().getIDVariedad(),
+            Float.valueOf(textFieldCantidad.getText())
+        );
+        try {
+            AdministradorCafe.agregar(cafe);
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public void clicEditar(ActionEvent actionEvent) {
+        Cafe cafe = new Cafe(
+            Integer.valueOf(textFieldID.getText()),
+            textFieldProductor.getText(),
+            comboVariedad.getSelectionModel().getSelectedItem().getIDVariedad(),
+            Float.valueOf(textFieldCantidad.getText())
+        );
+        try {
+            AdministradorCafe.editar(cafe);
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public void clicBorrar(ActionEvent actionEvent) {
+        try {
+            AdministradorCafe.borrar(Integer.valueOf(textFieldID.getText()));
+            cargarTabla();
+            limpiarCampos();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public void cargarTabla() {
+        try {
+            tablaCafe.getItems().setAll(AdministradorCafe.obtenerCafe());
+        } catch (Exception e) {
+            System.err.println("Error al cargar Cafes: " + e.getMessage());
+        }
+    }
+
+    public void limpiarCampos() {
+        textFieldID.setText("");
+        textFieldProductor.setText("");
+        textFieldCantidad.setText("");
+        comboVariedad.getSelectionModel().clearSelection();
+    }
+}</code></pre>
+</div>
+
+<!-- 6. EL ENFOQUE PROFESIONAL: SIN SINGLETON, PREPAREDSTATEMENT CON ? Y PREVENCIÓN DE SQL INJECTION -->
+<h3 class="text-2xl font-bold text-rose-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-shield-halved text-rose-400"></i> 6. ¿Y cómo se hace SIN Singleton? <code>PreparedStatement</code> con <code>?</code> (Placeholders)
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    En los ejemplos anteriores del repositorio <code>BaseDatos</code>, vimos que <code>AdmonCafe.java</code> armaba las consultas usando <code>String.format("INSERT INTO Cafe ... VALUES('%s', %d, %f)", ...)</code> apoyándose en la conexión única y global de <code>Datos.getInstance()</code>. Aunque esa forma es muy rápida para prácticas escolares, <strong>en proyectos profesionales NO se hace así</strong>. Veamos por qué y cómo se programa el enfoque estándar de la industria.
+</p>
+
+<!-- LOS 2 PROBLEMAS GRAVES DE STRING.FORMAT Y CONEXIONES PERMANENTES -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="glass p-5 rounded-xl border-l-4 border-l-rose-500">
+        <h4 class="font-bold text-rose-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation"></i> 1. El Peligro Mortal: Inyección SQL (SQL Injection)
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed mb-3">
+            Cuando usas <code>String.format</code> o concatenación con <code>+</code>, el motor de base de datos interpreta lo que escriba el usuario como código SQL ejecutable.
+        </p>
+        <div class="bg-black/60 p-3 rounded-lg border border-rose-500/30 text-xs font-mono text-rose-200 mb-2">
+            // Si el usuario escribe esto en textFieldProductor:<br>
+            <span class="text-amber-300">"Don Pedro', 1, 0); DROP TABLE Cafe; --"</span><br><br>
+            // String.format produce este comando letal:<br>
+            INSERT INTO Cafe(Productor, VariedadCafe, Cantidad)<br>
+            VALUES('Don Pedro', 1, 0); <span class="text-rose-400 font-bold">DROP TABLE Cafe;</span> --', 1, 0);
+        </div>
+        <p class="text-xs text-slate-400 leading-relaxed">
+            ¡La tabla <code>Cafe</code> completa es eliminada al instante! Además, si un cliente se apellida <code>O'Connor</code> o <code>D'Angelo</code>, la comilla simple rompe la sintaxis y lanza una excepción <code>SQLException: syntax error</code>.
+        </p>
+    </div>
+
+    <div class="glass p-5 rounded-xl border-l-4 border-l-amber-500">
+        <h4 class="font-bold text-amber-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-plug-circle-xmark"></i> 2. ¿Por qué prescindir del Singleton global?
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed mb-2">
+            Tener un <strong>Singleton con una sola conexión abierta para siempre</strong> tiene riesgos en producción:
+        </p>
+        <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside leading-relaxed">
+            <li><strong>Conexión caída o timeout:</strong> Si MySQL o SQLite cierran la conexión por inactividad, toda la aplicación deja de funcionar porque el Singleton nunca la reabre.</li>
+            <li><strong>Concurrencia:</strong> Si dos hilos o pantallas intentan usar la misma <code>Connection</code> al mismo tiempo, las transacciones se cruzan.</li>
+            <li><strong>La Solución Estándar:</strong> Cada operación abre su propia conexión bajo demanda y la cierra inmediatamente al terminar, o mejor aún, la pide a un <em>Pool de Conexiones</em> (como HikariCP).</li>
+        </ul>
+    </div>
+</div>
+
+<!-- CÓMO FUNCIONA PREPAREDSTATEMENT CON SIGNOS DE INTERROGACIÓN ? -->
+<h4 class="text-xl font-bold text-cyan-300 mb-3 flex items-center gap-2">
+    <i class="fa-solid fa-circle-question text-cyan-400"></i> Anatomía de <code>PreparedStatement</code> con Comodines <code>?</code> (Placeholders)
+</h4>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Con <code>PreparedStatement</code>, la sentencia SQL se escribe con signos de interrogación <code>?</code> en cada valor variable. Luego se usan los métodos tipados <code>setX(indice, valor)</code> para inyectar los datos:
+</p>
+
+<div class="glass p-5 rounded-xl border border-cyan-500/30 mb-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+            <div class="font-bold text-white text-xs mb-2 flex items-center gap-2">
+                <span class="bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded font-mono">1</span>
+                Plantilla SQL con comodines <code>?</code>
+            </div>
+            <pre class="bg-black/60 p-3 rounded-lg border border-white/10 text-xs font-mono text-cyan-200"><code>String sql = "INSERT INTO Cafe (Productor, VariedadCafe, Cantidad) VALUES (?, ?, ?)";
+PreparedStatement ps = con.prepareStatement(sql);</code></pre>
+            <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                El motor de la base de datos <strong>compila primero la consulta</strong> antes de recibir los valores. Ningún texto ingresado podrá alterar la lógica del comando SQL.
+            </p>
+        </div>
+
+        <div>
+            <div class="font-bold text-white text-xs mb-2 flex items-center gap-2">
+                <span class="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-mono">2</span>
+                Asignación con <code>setX(índice, valor)</code>
+            </div>
+            <pre class="bg-black/60 p-3 rounded-lg border border-white/10 text-xs font-mono text-emerald-300"><code>// ¡REGLA DE ORO DE JDBC! Los índices empiezan en 1 (NO en 0)
+ps.setString(1, cafe.getProductor());    // 1er ? -> VARCHAR
+ps.setInt(2, cafe.getVariedadCafe());    // 2do ? -> INTEGER
+ps.setFloat(3, cafe.getCantidad());      // 3er ? -> FLOAT
+
+ps.executeUpdate(); // Ejecuta INSERT, UPDATE o DELETE</code></pre>
+            <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                Si <code>cafe.getProductor()</code> vale <code>"O'Connor"</code> o incluye código malicioso, el driver escapa todo de forma nativa a nivel binario.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- CÓDIGO COMPLETO: CAFEDAO SIN SINGLETON CON TRY-WITH-RESOURCES -->
+<h4 class="text-xl font-bold text-emerald-300 mb-3 flex items-center gap-2">
+    <i class="fa-solid fa-code text-emerald-400"></i> Código Completo: <code>CafeDAO.java</code> (Sin Singleton + <code>try-with-resources</code>)
+</h4>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Observa cómo luce la clase administradora profesional: ya no llama a <code>Datos.getInstance()</code>. En su lugar, usa un método <code>conectar()</code> y la sentencia <code>try (...)</code> con recursos automáticos, la cual cierra la <code>Connection</code>, el <code>PreparedStatement</code> y el <code>ResultSet</code> automáticamente sin riesgo de fugas de memoria:
+</p>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-emerald-300 text-sm"></i> src/main/java/com/example/basedatos/ADMON/CafeDAO.java (Enfoque Sin Singleton)
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">package com.example.basedatos.ADMON;
+
+import com.example.basedatos.POJO.Cafe;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.LinkedList;
+
+public class CafeDAO {
+    // Datos de conexión (pueden venir de un .properties o pasarse directo)
+    private static final String URL_SQLITE = "jdbc:sqlite:informacion.db";
+    private static final String URL_MYSQL = "jdbc:mysql://localhost:3306/informacion_db";
+    private static final String USER = "root";
+    private static final String PASS = "";
+
+    // Método que abre una conexión fresca bajo demanda
+    private Connection obtenerConexion() throws SQLException {
+        try {
+            // Intentar MySQL primero
+            return DriverManager.getConnection(URL_MYSQL, USER, PASS);
+        } catch (SQLException e) {
+            // Respaldo local a SQLite si MySQL no está encendido
+            return DriverManager.getConnection(URL_SQLITE);
+        }
+    }
+
+    // 1. AGREGAR (INSERT) con comodines ? y PreparedStatement
+    public boolean agregar(Cafe cafe) {
+        String sql = "INSERT INTO Cafe (Productor, VariedadCafe, Cantidad) VALUES (?, ?, ?)";
+
+        // try-with-resources: ¡Garantiza que conexion y ps se cierren solos al terminar!
+        try (Connection con = obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            // Asignación de parámetros por posición (inicia en 1)
+            ps.setString(1, cafe.getProductor());
+            ps.setInt(2, cafe.getVariedadCafe());
+            ps.setFloat(3, cafe.getCantidad());
+
+            // executeUpdate() devuelve cuántas filas fueron afectadas (1 si se guardó bien)
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al agregar cafe: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // 2. EDITAR (UPDATE) con comodines ?
+    public boolean editar(Cafe cafe) {
+        String sql = "UPDATE Cafe SET Productor = ?, VariedadCafe = ?, Cantidad = ? WHERE IDCafe = ?";
+
+        try (Connection con = obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, cafe.getProductor());
+            ps.setInt(2, cafe.getVariedadCafe());
+            ps.setFloat(3, cafe.getCantidad());
+            ps.setInt(4, cafe.getIdcafe()); // 4to ? es la condición del WHERE
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al editar cafe: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // 3. BORRAR (DELETE) con comodín ?
+    public boolean borrar(int idCafe) {
+        String sql = "DELETE FROM Cafe WHERE IDCafe = ?";
+
+        try (Connection con = obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idCafe);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al borrar cafe: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // 4. CONSULTAR (SELECT) y mapeo de ResultSet
+    public LinkedList<Cafe> obtenerTodos() {
+        LinkedList<Cafe> lista = new LinkedList<>();
+        String sql = "SELECT IDCafe, Productor, VariedadCafe, Cantidad FROM Cafe";
+
+        try (Connection con = obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) { // Para lectura usamos executeQuery()
+
+            while (rs.next()) {
+                lista.add(new Cafe(
+                    rs.getInt("IDCafe"),
+                    rs.getString("Productor"),
+                    rs.getInt("VariedadCafe"),
+                    rs.getFloat("Cantidad")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al consultar cafes: " + e.getMessage());
+        }
+        return lista;
+    }
+}</code></pre>
+</div>
+
+<!-- TABLA COMPARATIVA FINAL -->
+<div class="glass p-6 rounded-xl border border-white/10 mb-8 overflow-x-auto">
+    <h4 class="font-bold text-white mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-scale-balanced text-amber-400"></i> Tabla Comparativa: Enfoque Singleton vs Enfoque PreparedStatement Estándar
+    </h4>
+    <table class="w-full text-xs text-left text-slate-300">
+        <thead class="text-xs uppercase bg-white/5 text-slate-400 border-b border-white/10">
+            <tr>
+                <th class="p-3">Característica</th>
+                <th class="p-3 text-amber-300">Enfoque con Singleton (Datos.java)</th>
+                <th class="p-3 text-emerald-300">Enfoque Estándar Sin Singleton (CafeDAO)</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+            <tr>
+                <td class="p-3 font-semibold text-white">Ciclo de vida de la conexión</td>
+                <td class="p-3">Una sola conexión global estática que nunca se cierra.</td>
+                <td class="p-3">Se abre y se cierra en cada operación con <code>try-with-resources</code> (o mediante Pool).</td>
+            </tr>
+            <tr>
+                <td class="p-3 font-semibold text-white">Construcción de la consulta</td>
+                <td class="p-3">Concatenación de cadenas con <code>String.format(...)</code>.</td>
+                <td class="p-3">Plantilla precompilada con comodines <code>?</code> (Placeholders).</td>
+            </tr>
+            <tr>
+                <td class="p-3 font-semibold text-white">Seguridad (Inyección SQL)</td>
+                <td class="p-3 text-rose-400 font-semibold"><i class="fa-solid fa-xmark mr-1"></i> Vulnerable a código malicioso en campos de texto.</td>
+                <td class="p-3 text-emerald-400 font-semibold"><i class="fa-solid fa-check mr-1"></i> 100% Inmune; los datos viajan separados del comando.</td>
+            </tr>
+            <tr>
+                <td class="p-3 font-semibold text-white">Caracteres como comillas simples (<code>'</code>)</td>
+                <td class="p-3 text-rose-300">Rompe la consulta con error de sintaxis SQL.</td>
+                <td class="p-3 text-emerald-300">Se escapan de forma totalmente transparente y automática.</td>
+            </tr>
+            <tr>
+                <td class="p-3 font-semibold text-white">Rendimiento</td>
+                <td class="p-3">La base de datos recompila la consulta cada vez.</td>
+                <td class="p-3">El motor reutiliza el plan de ejecución precompilado de la sentencia.</td>
+            </tr>
+            <tr>
+                <td class="p-3 font-semibold text-white">Ejecución de cambios</td>
+                <td class="p-3"><code>ps.execute()</code> genérico.</td>
+                <td class="p-3"><code>ps.executeUpdate()</code> (devuelve filas afectadas para validar éxito).</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

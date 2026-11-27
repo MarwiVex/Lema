@@ -1,0 +1,316 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-amber-500/20 text-amber-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-triangle-exclamation"></i></span>
+    Manejo de Excepciones en Java
+</h2>
+
+<p class="text-slate-300 mb-6 text-base leading-relaxed">
+    En la programación profesional, las cosas no siempre salen como se planean: un usuario puede ingresar un texto cuando se esperaba un número, intentar dividir entre cero o solicitar una posición que no existe dentro de un arreglo. En Java, el <strong>Manejo de Excepciones</strong> es el mecanismo que nos permite capturar estos eventos anómalos y evitar que la aplicación se detenga abruptamente (<em>crash</em>).
+</p>
+
+<!-- Conceptos Fundamentales: Diseño vs Ejecución -->
+<h3 class="text-2xl font-bold text-blue-300 mb-4 mt-8">Errores en Tiempo de Dise&ntilde;o (Compilaci&oacute;n) vs. Tiempo de Ejecuci&oacute;n</h3>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="bg-black/40 border border-white/5 p-6 rounded-xl border-l-4 border-l-rose-500 hover:bg-white/5 transition-colors">
+        <div class="flex items-center gap-3 mb-3">
+            <span class="p-2 rounded-lg bg-rose-500/20 text-rose-400 font-bold"><i class="fa-solid fa-code text-lg"></i></span>
+            <h4 class="font-bold text-rose-400 text-lg">Errores de Compilaci&oacute;n (Tiempo de Dise&ntilde;o)</h4>
+        </div>
+        <p class="text-sm text-slate-300 leading-relaxed mb-3">
+            Son detectados por el compilador (<code>javac</code>) antes de ejecutar el programa. Ocurren por violaciones a la sintaxis o reglas del lenguaje Java.
+        </p>
+        <ul class="text-xs text-slate-400 space-y-1.5 list-disc list-inside">
+            <li>Olvidar un punto y coma (<code>;</code>) o una llave de cierre.</li>
+            <li>Incompatibilidad de tipos (ej. <code>int x = "hola";</code>).</li>
+            <li>Llamar a un m&eacute;todo o variable que no existe o es privada.</li>
+            <li><strong>Resultado:</strong> El ejecutable <code>.class</code> no se genera.</li>
+        </ul>
+    </div>
+
+    <div class="bg-black/40 border border-white/5 p-6 rounded-xl border-l-4 border-l-amber-500 hover:bg-white/5 transition-colors">
+        <div class="flex items-center gap-3 mb-3">
+            <span class="p-2 rounded-lg bg-amber-500/20 text-amber-400 font-bold"><i class="fa-solid fa-bug text-lg"></i></span>
+            <h4 class="font-bold text-amber-400 text-lg">Errores en Tiempo de Ejecuci&oacute;n (Excepciones)</h4>
+        </div>
+        <p class="text-sm text-slate-300 leading-relaxed mb-3">
+            El c&oacute;digo sint&aacute;cticamente es correcto y compila perfectamente, pero durante la ejecuci&oacute;n ocurre un evento inesperado.
+        </p>
+        <ul class="text-xs text-slate-400 space-y-1.5 list-disc list-inside">
+            <li>Dividir entre cero (<code>10 / 0</code>).</li>
+            <li>Acceder a un &iacute;ndice de arreglo fuera de rango (ej. <code>datos[15]</code>).</li>
+            <li>Entrada de usuario no v&aacute;lida en un <code>Scanner</code>.</li>
+            <li><strong>Resultado:</strong> Lanzamiento de una <code>Exception</code> (interrupci&oacute;n del flujo).</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Jerarquía de Excepciones -->
+<h3 class="text-2xl font-bold text-blue-300 mb-4 mt-12">Jerarqu&iacute;a de Excepciones en Java (Throwable)</h3>
+<p class="text-slate-300 mb-6 text-sm leading-relaxed">
+    Todas las excepciones en Java heredan de la clase base <code>java.lang.Throwable</code>. Esta clase se divide en dos grandes ramas:
+</p>
+
+<div class="space-y-4 mb-10">
+    <div class="glass p-5 rounded-xl relative overflow-hidden group">
+        <div class="absolute top-0 left-0 w-1 h-full bg-rose-500"></div>
+        <h4 class="font-bold text-rose-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-skull-crossbones w-5 text-center"></i> Error (java.lang.Error)</h4>
+        <p class="text-sm text-slate-300 ml-7">Fallas cr&iacute;ticas e irrecuperables a nivel de la Máquina Virtual de Java (JVM), como <code>OutOfMemoryError</code> o <code>StackOverflowError</code>. El programa no debe intentar capturarlos.</p>
+    </div>
+    
+    <div class="glass p-5 rounded-xl relative overflow-hidden group">
+        <div class="absolute top-0 left-0 w-1 h-full bg-amber-400"></div>
+        <h4 class="font-bold text-amber-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-shield-cat w-5 text-center"></i> Checked Exceptions (Verificadas)</h4>
+        <p class="text-sm text-slate-300 ml-7">Excepciones que el compilador te obliga a controlar expl&iacute;citamente mediante un bloque <code>try-catch</code> o declarando <code>throws</code> en el m&eacute;todo. Ejemplo: <code>IOException</code>, <code>SQLException</code>, <code>Exception</code>.</p>
+    </div>
+
+    <div class="glass p-5 rounded-xl relative overflow-hidden group">
+        <div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
+        <h4 class="font-bold text-blue-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-bolt w-5 text-center"></i> Unchecked Exceptions (No Verificadas / RuntimeException)</h4>
+        <p class="text-sm text-slate-300 ml-7">Heredan de <code>RuntimeException</code>. Ocurren por errores l&oacute;gicos de programaci&oacute;n. El compilador no exige capturarlas obligatoriamente, pero causan la detenci&oacute;n del programa si no se prev&eacute;n. Ejemplo: <code>ArithmeticException</code>, <code>ArrayIndexOutOfBoundsException</code>, <code>NullPointerException</code>.</p>
+    </div>
+</div>
+
+<!-- Bloques try, catch, finally y múltiples catch -->
+<h3 class="text-2xl font-bold text-blue-300 mb-4 mt-12 flex items-center gap-3">
+    <span class="bg-blue-500/20 text-blue-400 p-2 rounded-lg text-lg"><i class="fa-solid fa-lock"></i></span>
+    Captura de Excepciones con <code>try</code>, <code>catch</code> y M&uacute;ltiples Capturas
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Para manejar situaciones donde se pueden generar m&uacute;ltiples excepciones (como leer un entero del usuario, hacer una divisi&oacute;n y consultar una posici&oacute;n de un arreglo en memoria), utilizamos el bloque <code>try</code> rodeado de distintos <code>catch</code> espec&iacute;ficos:
+</p>
+
+<!-- Ejemplo 1: Entrada de Scanner, División y Arreglo fuera de límites -->
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-blue-500/20 text-blue-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center justify-between">
+        <span class="flex items-center gap-2"><i class="fa-brands fa-java text-blue-300 text-sm"></i> ManejoExcepcionesEntrada.java</span>
+        <span class="text-[11px] text-slate-400">Ejemplo de bucle interactivo con captura m&uacute;ltiple</span>
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">import java.util.Scanner;
+import java.util.InputMismatchException;
+
+public class ManejoExcepcionesEntrada {
+    public static void main(String[] args) {
+        Scanner lectura = new Scanner(System.in);
+        Integer variable = null;
+
+        // Arreglo de 10 elementos (índices válidos: 0 a 9)
+        int[] datos = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+        while (variable == null) {
+            try {
+                System.out.print("Introducir número entero (0-9): ");
+                variable = lectura.nextInt(); // Puede lanzar InputMismatchException
+
+                // 1. Operación de División (Puede lanzar ArithmeticException si variable == 0)
+                int resultado = 10 / variable;
+
+                // 2. Acceso al Arreglo (Puede lanzar ArrayIndexOutOfBoundsException si variable < 0 o >= 10)
+                System.out.printf("Resultado División: %d | Valor en Arreglo[%d]: %d\n", 
+                                  resultado, variable, datos[variable]);
+
+            } catch (ArithmeticException e) {
+                System.err.println("❌ Error: División entre cero no permitida.");
+                variable = null; // Para repetir el bucle
+            } catch (ArrayIndexOutOfBoundsException e) {
+                System.err.println("❌ Error: No existe la posición " + variable + " en el arreglo (Índices válidos: 0 a 9).");
+                variable = null; // Para repetir el bucle
+            } catch (InputMismatchException e) {
+                System.err.println("❌ Error: La entrada no es un número entero válido.");
+                lectura.next(); // Limpiar el buffer de Scanner para evitar bucle infinito
+                variable = null;
+            } catch (Exception e) {
+                System.err.println("❌ Error inesperado: " + e.getMessage());
+                variable = null;
+            } finally {
+                System.out.println("--- Intento finalizado ---\n");
+            }
+        }
+        
+        System.out.println("¡Programa finalizado con éxito!");
+        lectura.close();
+    }
+}</code></pre>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+    <div class="glass p-4 rounded-xl border-t-2 border-t-rose-500">
+        <h5 class="font-bold text-rose-400 text-sm mb-1">1. ArithmeticException</h5>
+        <p class="text-xs text-slate-300">Se produce si el usuario ingresa <code>0</code>, impidiendo la divisi&oacute;n por cero (<code>10 / 0</code>).</p>
+    </div>
+    <div class="glass p-4 rounded-xl border-t-2 border-t-amber-500">
+        <h5 class="font-bold text-amber-400 text-sm mb-1">2. ArrayIndexOutOfBoundsException</h5>
+        <p class="text-xs text-slate-300">Se genera si el entero introducido est&aacute; fuera del rango de memoria del arreglo (ej. <code>12</code> o <code>-3</code>).</p>
+    </div>
+    <div class="glass p-4 rounded-xl border-t-2 border-t-blue-500">
+        <h5 class="font-bold text-blue-400 text-sm mb-1">3. InputMismatchException</h5>
+        <p class="text-xs text-slate-300">Se activa si el usuario ingresa texto como <code>"abc"</code> en vez de un n&uacute;mero entero.</p>
+    </div>
+</div>
+
+<!-- Excepciones en Clases y Métodos: throw y throws -->
+<h3 class="text-2xl font-bold text-blue-300 mb-4 mt-14 flex items-center gap-3">
+    <span class="bg-emerald-500/20 text-emerald-400 p-2 rounded-lg text-lg"><i class="fa-solid fa-shapes"></i></span>
+    Excepciones dentro de Clases (<code>throw</code> y <code>throws</code>)
+</h3>
+
+<p class="text-slate-300 mb-6 text-base leading-relaxed">
+    Cuando diseñamos clases orientadas a objetos, el <code>throw</code> nos permite <strong>lanzar una excepción deliberadamente</strong> si las reglas de negocio de la clase son violadas (por ejemplo, dimensiones negativas en un equipo electr&oacute;nico). La palabra clave <code>throws</code> en la firma del m&eacute;todo le avisa a quien invoque la funci&oacute;n que debe manejar dicha excepci&oacute;n.
+</p>
+
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+    <!-- Monitor.java -->
+    <div class="code-wrapper relative pt-6">
+        <div class="absolute top-0 left-0 bg-blue-500/20 text-blue-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-brands fa-java text-blue-300 text-sm"></i> Monitor.java (Validación con throw)
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">// Clase Monitor que deriva de Electronico
+public class Monitor extends Electronico {
+    private String tipo;
+    private Float pulgadas;
+
+    public Float getPulgadas() {
+        return pulgadas;
+    }
+
+    // El método declara 'throws Exception' porque puede lanzar una excepción
+    public void setPulgadas(Float pulgadas) throws Exception {
+        if (pulgadas < 0) {
+            // Lanzamos manualmente una excepción con un mensaje explicativo
+            throw new Exception("No existen monitores con dimensión negativa");
+        }
+        this.pulgadas = pulgadas;
+    }
+
+    @Override
+    public String toString() {
+        return "Monitor [Tipo=" + tipo + ", Pulgadas=" + pulgadas + "]";
+    }
+}
+
+// Clase base sugerida para el ejemplo
+class Electronico {
+    protected String marca;
+    protected String modelo;
+}</code></pre>
+    </div>
+
+    <!-- Principal.java -->
+    <div class="code-wrapper relative pt-6">
+        <div class="absolute top-0 left-0 bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-brands fa-java text-emerald-300 text-sm"></i> Principal.java (Captura de la Excepción)
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">import java.util.Scanner;
+
+public class Principal {
+    public static void main(String[] args) {
+        Monitor monitor = new Monitor();
+
+        try {
+            // Intentamos asignar una dimensión inválida (-10)
+            monitor.setPulgadas(-10f);
+        } catch (Exception e) {
+            // Capturamos e imprimimos el error generado por la clase Monitor
+            System.err.println(e);
+        }
+
+        // El flujo del programa continúa normalmente sin colapsar
+        System.out.println(monitor);
+    }
+}</code></pre>
+    </div>
+</div>
+
+<div class="p-4 bg-emerald-900/20 border border-emerald-500/20 rounded-xl text-xs text-emerald-200 mb-10">
+    <p><i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i><strong>Salida por Consola esperada:</strong></p>
+    <code class="block mt-2 bg-black/60 p-3 rounded font-mono text-rose-300">
+        java.lang.Exception: No existen monitores con dimensión negativa<br>
+        Monitor [Tipo=null, Pulgadas=null]
+    </code>
+</div>
+
+<!-- Creación de Excepciones Personalizadas -->
+<h3 class="text-2xl font-bold text-blue-300 mb-4 mt-12 flex items-center gap-3">
+    <span class="bg-purple-500/20 text-purple-400 p-2 rounded-lg text-lg"><i class="fa-solid fa-gears"></i></span>
+    Creaci&oacute;n de Excepciones Personalizadas (Custom Exceptions)
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Para que el c&oacute;digo sea m&aacute;s legible y los errores tengan nombres espec&iacute;ficos del dominio de tu aplicaci&oacute;n, puedes crear tus propias clases de excepci&oacute;n heredando de <code>Exception</code> o <code>RuntimeException</code>:
+</p>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-purple-500/20 text-purple-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-purple-300 text-sm"></i> ProductoNoEncontradoException.java
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">// Excepción personalizada
+public class ProductoNoEncontradoException extends Exception {
+    public ProductoNoEncontradoException(String mensaje) {
+        super(mensaje);
+    }
+}
+
+// Uso en el método de la clase Almacen:
+// public void actualizarProducto(String SKU, Producto nuevo) throws ProductoNoEncontradoException {
+//     Producto p = buscarProducto(SKU);
+//     if (p == null) {
+//         throw new ProductoNoEncontradoException("No hay productos con ese SKU");
+//     }
+//     // Lógica de actualización...
+// }</code></pre>
+</div>
+
+<!-- Resumen de Excepciones Comunes -->
+<h3 class="text-2xl font-bold text-blue-300 mb-4 mt-12">Resumen de Excepciones Comunes en Java</h3>
+
+<div class="overflow-x-auto mb-8">
+    <table class="w-full text-left text-sm text-slate-300 border-collapse">
+        <thead>
+            <tr class="border-b border-white/10 bg-white/5 text-blue-300">
+                <th class="p-3 font-semibold">Excepci&oacute;n</th>
+                <th class="p-3 font-semibold">Tipo</th>
+                <th class="p-3 font-semibold">&iquest;Cu&aacute;ndo ocurre?</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+            <tr class="hover:bg-white/5">
+                <td class="p-3 font-mono text-rose-300">ArithmeticException</td>
+                <td class="p-3 text-xs"><span class="px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded">Unchecked</span></td>
+                <td class="p-3 text-slate-300">Operaciones aritm&eacute;ticas imposibles, como divisi&oacute;n por cero.</td>
+            </tr>
+            <tr class="hover:bg-white/5">
+                <td class="p-3 font-mono text-rose-300">ArrayIndexOutOfBoundsException</td>
+                <td class="p-3 text-xs"><span class="px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded">Unchecked</span></td>
+                <td class="p-3 text-slate-300">Intento de acceder a un &iacute;ndice negativo o mayor o igual a <code>arreglo.length</code>.</td>
+            </tr>
+            <tr class="hover:bg-white/5">
+                <td class="p-3 font-mono text-rose-300">NullPointerException</td>
+                <td class="p-3 text-xs"><span class="px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded">Unchecked</span></td>
+                <td class="p-3 text-slate-300">Intentar llamar a un m&eacute;todo o propiedad de un objeto que apunta a <code>null</code>.</td>
+            </tr>
+            <tr class="hover:bg-white/5">
+                <td class="p-3 font-mono text-rose-300">InputMismatchException</td>
+                <td class="p-3 text-xs"><span class="px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded">Unchecked</span></td>
+                <td class="p-3 text-slate-300">El dato le&iacute;do por <code>Scanner</code> no coincide con el tipo esperado (ej. ingresar texto para un entero).</td>
+            </tr>
+            <tr class="hover:bg-white/5">
+                <td class="p-3 font-mono text-rose-300">NumberFormatException</td>
+                <td class="p-3 text-xs"><span class="px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded">Unchecked</span></td>
+                <td class="p-3 text-slate-300">Fallo al intentar convertir un <code>String</code> a un tipo num&eacute;rico (ej. <code>Integer.parseInt("abc")</code>).</td>
+            </tr>
+            <tr class="hover:bg-white/5">
+                <td class="p-3 font-mono text-rose-300">IOException / Exception</td>
+                <td class="p-3 text-xs"><span class="px-2 py-0.5 bg-amber-500/20 text-amber-300 rounded">Checked</span></td>
+                <td class="p-3 text-slate-300">Errores al manejar archivos, redes o excepciones declaradas expl&iacute;citamente con <code>throws</code>.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="p-4 bg-blue-900/20 border border-blue-500/20 rounded-xl text-xs text-blue-200">
+    <p><i class="fa-solid fa-lightbulb text-yellow-400 mr-2"></i><strong>Tip Pro:</strong> Siempre usa el bot&oacute;n <strong>Copiar</strong> y p&eacute;galo en la <strong>Terminal Global</strong> para probar el comportamiento de las excepciones en tiempo real.</p>
+</div>

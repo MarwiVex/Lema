@@ -1,0 +1,68 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-blue-500/20 text-blue-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-1"></i></span>
+    Variables y Hola Mundo
+</h2>
+
+<p class="text-slate-300 mb-6 text-sm leading-relaxed">
+    Si vienes de C, Java te será muy familiar. Como un repaso súper rápido, todo en Java vive dentro de una <code>class</code> y arranca desde un método <code>public static void main(String[] args)</code>.
+</p>
+
+<h3 class="text-xl font-semibold text-blue-300 mb-3 mt-8">Impresión en Consola</h3>
+<div class="code-wrapper mb-8">
+    <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl shadow-lg border border-white/10 m-0"><code class="language-java">public class principal {
+    public static void main(String[] args){
+        System.out.print("Hola Mundo");     // Sin salto de línea
+        System.out.println("Hola Mundo");   // Con salto de línea
+        System.out.printf("Hola Mundo \n"); // Formateado (Igual que C)
+
+        System.err.println("Hola Error");   // Imprime un error (rojo en consola)
+    }
+}</code></pre>
+</div>
+
+<h3 class="text-xl font-semibold text-blue-300 mb-3 mt-8">Cadenas (Strings)</h3>
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">En Java ya no sufres con los arreglos de <code>char</code>. Existe el objeto <code>String</code> que se concatena fácilmente con el símbolo <code>+</code> o <code>+=</code>.</p>
+<div class="code-wrapper mb-8">
+    <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl shadow-lg border border-white/10 m-0"><code class="language-java">public class string {
+    public static void main(String[] args){
+        String Cadena = "Hola mundo";
+        Cadena += " desde Java\n";
+        Cadena += " en clase de POO";
+        System.out.println(Cadena);
+
+        // Los char[] aún existen, pero se usan poco
+        char arreglo[] = {'H', 'o', 'l', 'a'};
+        System.out.println(arreglo);
+    }
+}</code></pre>
+</div>
+
+<h3 class="text-xl font-semibold text-blue-300 mb-3 mt-8">Datos Primitivos vs Wrappers</h3>
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Además de los primitivos que ya conoces (<code>int</code>, <code>float</code>), Java tiene envoltorios o "Wrappers" (<code>Integer</code>, <code>Float</code>). Hacen lo mismo pero incluyen funciones extra.
+</p>
+<div class="code-wrapper mb-8">
+    <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl shadow-lg border border-white/10 m-0"><code class="language-java">public class datos {
+    public static void main (String[] args){
+        // Primitivos normales
+        int iEdad = 89;
+        float fCantidad = 15.5f; // ¡La 'f' es obligatoria en Java!
+        double dValor = 3.1415;
+        
+        // Wrappers (inician con mayúscula)
+        Integer Edad = 12;
+        Float Cantidad = 1.5f;
+        
+        System.out.printf("Edades: %03d, %.2f, %f \n", iEdad, fCantidad, dValor);
+        
+        // Función propia del Wrapper
+        System.out.printf("%05f\n", Edad.floatValue());
+        
+        // Condicional ternario idéntico a C
+        System.out.print(Edad.compareTo(iEdad) < 0 ? "Edad es Menor" : "IEdad es Menor");
+    }
+}</code></pre>
+</div>

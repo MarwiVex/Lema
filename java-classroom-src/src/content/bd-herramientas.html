@@ -1,0 +1,140 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-emerald-500/20 text-emerald-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+    18. Guía Práctica: DB Browser (SQLite) y XAMPP (MySQL)
+</h2>
+
+<p class="text-slate-300 mb-8 text-base leading-relaxed">
+    Para trabajar cómodamente con bases de datos en Java necesitamos herramientas visuales que nos permitan diseñar tablas, cargar datos de prueba, verificar qué insertó nuestro programa y monitorear las conexiones activas. Aquí tienes la guía paso a paso de las dos herramientas utilizadas en clase: <strong>DB Browser for SQLite</strong> y <strong>XAMPP + phpMyAdmin</strong>.
+</p>
+
+<!-- PARTE 1: DB BROWSER FOR SQLITE -->
+<h3 class="text-2xl font-bold text-cyan-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-Hard-drive text-cyan-400"></i> Parte 1: Guía Completa de DB Browser for SQLite
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    <strong>DB Browser for SQLite (DB4S)</strong> es la herramienta visual gratuita para crear y administrar archivos de base de datos SQLite (<code>.db</code> o <code>.sqlite</code>).
+</p>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <div class="glass p-5 rounded-xl border-l-4 border-l-cyan-500">
+        <h4 class="font-bold text-cyan-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-circle-plus"></i> Paso 1: Crear <code>informacion.db</code> en la Raíz del Proyecto
+        </h4>
+        <ol class="text-xs text-slate-300 space-y-2 list-decimal list-inside leading-relaxed">
+            <li>Abre DB Browser y haz clic en <strong>Nueva base de datos (New Database)</strong>.</li>
+            <li>Navega hasta la <strong>carpeta raíz de tu proyecto Java</strong> (en el mismo nivel donde está el archivo <code>pom.xml</code>).</li>
+            <li>Nómbrala exactamente <code>informacion.db</code> y guarda. Así, la ruta relativa <code>jdbc:sqlite:informacion.db</code> la encontrará sin depender de rutas absolutas como <code>C:\Users\...</code>.</li>
+        </ol>
+    </div>
+
+    <div class="glass p-5 rounded-xl border-l-4 border-l-emerald-500">
+        <h4 class="font-bold text-emerald-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-table-list"></i> Paso 2: Diseñar las Tablas Visualmente
+        </h4>
+        <ol class="text-xs text-slate-300 space-y-2 list-decimal list-inside leading-relaxed">
+            <li>Se abrirá la ventana <strong>Editar definición de la tabla</strong>. Escribe el nombre <code>VariedadCafe</code>.</li>
+            <li>Haz clic en <strong>Añadir (Add)</strong> para agregar campos:
+                <ul class="list-disc list-inside ml-4 mt-1 text-slate-400">
+                    <li><code>IDVariedad</code> &rarr; Tipo: <code>INTEGER</code> &rarr; Marca casillas <strong>NN</strong> (Not Null), <strong>PK</strong> (Primary Key) y <strong>AI</strong> (Autoincrement).</li>
+                    <li><code>Descripcion</code> &rarr; Tipo: <code>TEXT</code> &rarr; Marca casilla <strong>NN</strong>.</li>
+                </ul>
+            </li>
+            <li>Repite el proceso para la tabla <code>Cafe</code> y, en la columna <code>VariedadCafe</code>, haz doble clic en la columna <strong>Clave Foránea (Foreign Key)</strong> y selecciona <code>VariedadCafe(IDVariedad)</code>.</li>
+        </ol>
+    </div>
+</div>
+
+<!-- LAS 4 PESTAÑAS DE DB BROWSER -->
+<div class="glass p-6 rounded-xl border border-white/10 mb-6">
+    <h4 class="font-bold text-white mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-window-maximize text-cyan-400"></i> Las 4 Pestañas de DB Browser que Usarás a Diario
+    </h4>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+        <div class="bg-black/50 p-4 rounded-lg border border-white/5">
+            <div class="font-bold text-cyan-300 mb-1">1. Estructura de la BD</div>
+            <p class="text-slate-400 leading-relaxed">Muestra la lista de tablas, índices, vistas y triggers. Desde aquí puedes crear, modificar o eliminar tablas.</p>
+        </div>
+        <div class="bg-black/50 p-4 rounded-lg border border-white/5">
+            <div class="font-bold text-emerald-300 mb-1">2. Hoja de Datos (Browse Data)</div>
+            <p class="text-slate-400 leading-relaxed">Permite elegir la tabla en un desplegable, ver sus filas como en Excel, insertar filas nuevas con el icono <i class="fa-solid fa-file-circle-plus text-emerald-400"></i> o borrar registros.</p>
+        </div>
+        <div class="bg-black/50 p-4 rounded-lg border border-white/5">
+            <div class="font-bold text-amber-300 mb-1">3. Editar Pragmas</div>
+            <p class="text-slate-400 leading-relaxed">Configuración interna de SQLite. Aquí puedes asegurarte de que la casilla <code>Foreign Keys</code> esté activada.</p>
+        </div>
+        <div class="bg-black/50 p-4 rounded-lg border border-white/5">
+            <div class="font-bold text-purple-300 mb-1">4. Ejecutar SQL</div>
+            <p class="text-slate-400 leading-relaxed">Editor donde escribes sentencias <code>SELECT</code>, <code>INSERT</code> o <code>CREATE TABLE</code> y las ejecutas con el botón Play (<kbd>F5</kbd>).</p>
+        </div>
+    </div>
+</div>
+
+<!-- ALERTA CRÍTICA DB BROWSER -->
+<div class="glass p-6 rounded-xl border-l-4 border-l-rose-500 mb-10">
+    <h4 class="font-bold text-rose-400 mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-triangle-exclamation"></i> ¡Cuidado! El Error Más Común en DB Browser: "Guardar Cambios (Write Changes)"
+    </h4>
+    <p class="text-xs text-slate-300 leading-relaxed">
+        Cuando agregas, editas o eliminas datos en DB Browser, los cambios quedan en una <strong>transacción abierta en memoria</strong>. Mientras no presiones el botón superior <strong>"Guardar cambios" (Write Changes / <kbd>Ctrl+S</kbd>)</strong>:
+    </p>
+    <ul class="list-disc list-inside text-xs text-slate-300 mt-2 space-y-1">
+        <li>Tu aplicación Java <strong>NO verá los datos nuevos</strong> que metiste en DB Browser.</li>
+        <li>Si tu aplicación Java intenta hacer un <code>INSERT</code>, <code>UPDATE</code> o <code>DELETE</code> mientras DB Browser tiene cambios sin guardar, SQLite lanzará el error <code class="text-rose-300">[SQLITE_BUSY] The database file is locked</code>.</li>
+    </ul>
+</div>
+
+<!-- PARTE 2: XAMPP Y PHPMYADMIN -->
+<h3 class="text-2xl font-bold text-amber-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-server text-amber-400"></i> Parte 2: Guía de XAMPP y phpMyAdmin (Servidor MySQL)
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    <strong>XAMPP</strong> es un paquete de desarrollo local que incluye el servidor web <strong>Apache</strong> y el motor de base de datos <strong>MySQL / MariaDB</strong> junto con su panel de administración web <strong>phpMyAdmin</strong>.
+</p>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="glass p-5 rounded-xl border-t-4 border-t-amber-500">
+        <h4 class="font-bold text-amber-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-play"></i> 1. Encender los Servicios
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Abre el <strong>XAMPP Control Panel</strong> y pulsa <strong>Start</strong> en dos módulos:
+            <br>&bull; <strong>Apache</strong> (necesario para abrir la interfaz web phpMyAdmin en el puerto 80).
+            <br>&bull; <strong>MySQL</strong> (inicia el servidor de base de datos en el puerto <code>3306</code>). Ambos deben ponerse en color verde.
+        </p>
+    </div>
+
+    <div class="glass p-5 rounded-xl border-t-4 border-t-blue-500">
+        <h4 class="font-bold text-blue-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-globe"></i> 2. Crear <code>informacion_db</code>
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Haz clic en el botón <strong>Admin</strong> de la fila MySQL (o entra a <code>http://localhost/phpmyadmin</code> en tu navegador). En la barra lateral izquierda haz clic en <strong>Nueva (New)</strong>, escribe <code>informacion_db</code> y pulsa <strong>Crear</strong>. Luego ve a la pestaña <strong>SQL</strong> y pega el script de creación de tablas.
+        </p>
+    </div>
+
+    <div class="glass p-5 rounded-xl border-t-4 border-t-emerald-500">
+        <h4 class="font-bold text-emerald-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-gauge-high"></i> 3. Monitorear Conexiones Activas
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            En la página principal de phpMyAdmin, ve a la pestaña superior <strong>Estado del servidor (Status) &rarr; Procesos (Processes)</strong>. Ahí verás en tiempo real cada conexión TCP abierta por tu aplicación Java, el usuario (<code>root</code>), la BD (<code>informacion_db</code>) y el estado (<code>Sleep</code> / <code>Query</code>).
+        </p>
+    </div>
+</div>
+
+<!-- VERIFICACIÓN DE SINGLETON EN PHPMYADMIN (EJEMPLOMYSQL.JAVA) -->
+<div class="glass p-6 rounded-xl border border-amber-500/30 mb-8">
+    <h4 class="font-bold text-amber-300 mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-microscope text-amber-400"></i> Práctica de Laboratorio: Verificando el Singleton en phpMyAdmin (<code>EjemploMYSQL.java</code>)
+    </h4>
+    <p class="text-xs text-slate-300 leading-relaxed mb-3">
+        En el repositorio <strong>BaseDatos</strong> se incluye la clase <code>EjemploMYSQL.java</code>, diseñada específicamente para comprobar en XAMPP por qué el patrón Singleton es vital en bases de datos:
+    </p>
+    <ol class="text-xs text-slate-300 space-y-2 list-decimal list-inside">
+        <li>El programa ejecuta un bucle <code>for</code> de 10 iteraciones pidiendo <code>DatosMYSQL.getInstance().getConexion()</code>.</li>
+        <li>Sin Singleton, se abrirían <strong>10 conexiones simultáneas</strong> contra MySQL, agotando rápidamente el límite de conexiones del servidor (error <code>Too many connections</code>).</li>
+        <li>Con Singleton, las 10 variables apuntan a la <strong>misma referencia en memoria</strong>, y al revisar <em>Estado del servidor &rarr; Procesos</em> en phpMyAdmin mientras el programa espera un <code>ENTER</code> en consola, comprobarás que <strong>solo existe 1 proceso activo</strong>.</li>
+    </ol>
+</div>

@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Folder {
+  id            String         @id @default(uuid())
+  name          String
+  parentId      String?
+  parent        Folder?        @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children      Folder[]       @relation("FolderHierarchy")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  documents     Document[]
+  latexProjects LatexProject[]
+
+  @@index([createdAt])
+  @@index([parentId])
+}
+
+model Document {
+  id              String   @id @default(uuid())
+  title           String
+  normalizedTitle String   @default("")
+  type            String   @default("TEXT") // "TEXT" or "WHITEBOARD"
+  content         String   // JSON string of the BlockNote AST
+  whiteboardData  String?  // JSON string of the tldraw state
+  folderId        String?
+  folder          Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Knowledge Graph links
+  links           Document[] @relation("DocumentLinks")
+  linkedFrom      Document[] @relation("DocumentLinks")
+
+  @@index([folderId])
+  @@index([title])
+  @@index([normalizedTitle])
+  @@index([updatedAt])
+}
+
+model OcrCache {
+  id         String   @id @default(uuid())
+  imageHash  String   @unique // SHA-256 del imageBase64
+  blocksJson String   // JSON string of the resulting BlockNote AST array
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+// ─── Proyectos LaTeX Externos ──────────────────────────────────────────────────
+// Almacena proyectos LaTeX subidos directamente (.tex único, .zip, o archivos sueltos)
+// junto con el PDF compilado (en Base64).
+
+model LatexProject {
+  id          String      @id @default(uuid())
+  title       String
+  description String?
+  pdfBase64   String?     // PDF compilado en Base64 (null si aún no se ha compilado)
+  compiledAt  DateTime?   // Fecha de la última compilación exitosa
+  folderId    String?
+  folder      Folder?     @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  files       LatexFile[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([folderId])
+  @@index([updatedAt])
+}
+
+model LatexFile {
+  id        String       @id @default(uuid())
+  projectId String
+  project   LatexProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  filename  String       // e.g. "main.tex", "chapters/intro.tex", "figures/fig1.png"
+  content   String       // Source code (text) or Base64 for binary files (images)
+  isBinary  Boolean      @default(false) // true for images, false for .tex/.sty etc.
+  isMain    Boolean      @default(false) // true for the main entry .tex file
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@unique([projectId, filename])
+  @@index([projectId, isMain])
+}
+
+model GraphEdge {
+  id        String   @id @default(uuid())
+  sourceId  String
+  targetId  String
+  label     String?
+  weight    Float    @default(1.0)
+  kind      String   @default("AUTO") // "AUTO" | "AI"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([sourceId, targetId])
+  @@index([sourceId])
+  @@index([targetId])
+}
+

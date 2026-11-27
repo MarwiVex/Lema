@@ -1,0 +1,45 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-blue-500/20 text-blue-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-3"></i></span>
+    Arreglos (Arrays) y Memoria
+</h2>
+
+<div class="highlight-box p-6 rounded-xl mb-8 mt-8">
+    <h3 class="text-xl font-bold text-accent mb-2"><i class="fa-solid fa-memory mr-2"></i>La Muerte de malloc() y free()</h3>
+    <p class="text-slate-300 text-sm leading-relaxed">
+        En Java olvídate de pedir memoria manualmente. Los arreglos siempre se guardan de forma dinámica usando la palabra reservada <code>new</code>. ¿Y cómo evitas fugas de memoria sin <code>free()</code>? 
+        Java tiene un sistema llamado <strong>Recolector de Basura (Garbage Collector)</strong> que destruye automáticamente la memoria que ya no está en uso. ¡Una maravilla!
+    </p>
+</div>
+
+<h3 class="text-2xl font-bold text-blue-300 mb-3">Sintaxis, .length y For-Each</h3>
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    A diferencia de C, donde un arreglo no sabe su propio tamaño, en Java todo arreglo tiene una propiedad mágica llamada <code>.length</code>. Además, te presentamos el bucle <strong>For-Each</strong>, que te permite recorrer todos los datos de golpe sin usar índices.
+</p>
+
+<div class="code-wrapper mb-8">
+    <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl shadow-lg border border-white/10 m-0"><code class="language-java">public class arreglos {
+    public static void main(String[] args){
+        // Pedimos memoria en Heap para 3 enteros. 
+        // ¡Nota!: Por defecto, Java los inicializa en 0 (no en basura)
+        int[] datos = new int[3];
+        
+        datos[0] = 100;
+        datos[1] = 200;
+        datos[2] = 300;
+
+        // 1. Recorrido Clásico usando .length
+        System.out.println("--- Recorrido For Normal ---");
+        for (int i=0; i < datos.length; i++){
+            System.out.println("En indice " + i + " hay " + datos[i]);
+        }
+
+        // 2. El poderoso For-Each
+        System.out.println("\n--- Recorrido For-Each ---");
+        // Se lee: "Por cada variable entera 'dato' dentro de 'datos'..."
+        for (int dato : datos){
+            System.out.println("Valor impreso: " + dato);
+        }
+    }
+}</code></pre>
+</div>

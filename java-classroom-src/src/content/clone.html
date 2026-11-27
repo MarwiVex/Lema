@@ -1,0 +1,132 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-purple-500/20 text-purple-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-clone"></i></span>
+    Copias Fantasma vs Copias Reales (Clone)
+</h2>
+
+<p class="text-slate-300 mb-8 text-base leading-relaxed">
+    Uno de los errores más comunes en la Programación Orientada a Objetos en Java sucede al intentar duplicar un objeto. Igualar dos variables (<code>objetoA = objetoB</code>) no hace lo que la mayoría de los principiantes creen.
+</p>
+
+<!-- 1. LA COPIA FANTASMA -->
+<h3 class="text-2xl font-bold text-rose-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-ghost text-rose-400"></i> 1. La Copia por Referencia (Ghost Copy)
+</h3>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="glass p-6 rounded-xl border-l-4 border-l-rose-500">
+        <h4 class="font-bold text-rose-400 mb-2">Punteros a la Memoria</h4>
+        <p class="text-xs text-slate-300 leading-relaxed mb-3">
+            Cuando haces <code>Producto p2 = p1;</code>, Java <strong>NO</strong> crea un nuevo producto en la memoria. Simplemente crea una nueva "etiqueta" (variable) que apunta <strong>al mismo objeto original</strong>. Esto significa que si modificas <code>p2</code>, ¡también estarás modificando a <code>p1</code>, porque son la misma entidad física en la RAM!
+        </p>
+    </div>
+    
+    <div class="bg-black/60 p-4 rounded-xl border border-rose-500/20 font-mono text-xs">
+        <span class="text-emerald-400">// Creamos un objeto físico real (con "new")</span><br>
+        Producto p1 = new Producto("TV", 500.0);<br><br>
+        
+        <span class="text-rose-400">// COPIA FANTASMA: Solo copiamos el puntero</span><br>
+        Producto p2 = p1;<br><br>
+        
+        <span class="text-emerald-400">// Modificamos p2...</span><br>
+        p2.setPrecio(100.0);<br><br>
+        
+        <span class="text-rose-400">// ¡OH SORPRESA! p1 también fue modificado</span><br>
+        System.out.println(p1.getPrecio()); <span class="text-slate-500">// Imprime: 100.0</span>
+    </div>
+</div>
+
+<!-- 2. LA CLONACIÓN REAL -->
+<h3 class="text-2xl font-bold text-emerald-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-wand-magic-sparkles text-emerald-400"></i> 2. La Copia Real (Deep / Shallow Clone)
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Para duplicar un objeto de verdad, debes forzar a Java a reservar nueva memoria para el segundo objeto. Existen múltiples formas de hacerlo, como implementar un constructor de copia o usar el método <code>clone()</code> de la interfaz <code>Cloneable</code>.
+</p>
+
+<div class="glass p-6 rounded-xl border border-emerald-500/30 mb-8">
+    <h4 class="font-bold text-emerald-300 mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-check text-emerald-400"></i> Solución Básica: Constructor de Copia
+    </h4>
+
+    <div class="code-wrapper relative pt-6 mb-4">
+        <div class="absolute top-0 left-0 bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-brands fa-java text-emerald-300 text-sm"></i> CopiaSegura.java
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">public class Producto {
+    private String nombre;
+    private double precio;
+    
+    // Constructor normal
+    public Producto(String nombre, double precio) {
+        this.nombre = nombre;
+        this.precio = precio;
+    }
+    
+    // CONSTRUCTOR DE COPIA
+    public Producto(Producto original) {
+        this.nombre = original.nombre;
+        this.precio = original.precio;
+    }
+}
+
+// ---- EN EL MAIN ----
+Producto p1 = new Producto("TV", 500.0);
+
+// COPIA REAL: Usamos 'new' para reservar nueva memoria
+Producto p2 = new Producto(p1);
+
+p2.setPrecio(100.0);
+System.out.println(p1.getPrecio()); // Imprime: 500.0 (¡p1 quedó intacto!)</code></pre>
+    </div>
+</div>
+
+<div class="glass p-6 rounded-xl border border-blue-500/30 mb-8 mt-6">
+    <h4 class="font-bold text-blue-300 mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-copy text-blue-400"></i> Solución Avanzada: Interfaz <code>Cloneable</code>
+    </h4>
+    <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+        Java ofrece un mecanismo nativo para clonar objetos a través de la interfaz <strong>marcador</strong> <code>Cloneable</code> y sobrescribiendo el método <code>clone()</code> de la clase <code>Object</code>.
+    </p>
+
+    <div class="code-wrapper relative pt-6 mb-4">
+        <div class="absolute top-0 left-0 bg-blue-500/20 text-blue-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-brands fa-java text-blue-300 text-sm"></i> ClonacionNativa.java
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">// 1. Implementar la interfaz Cloneable
+public class Producto implements Cloneable {
+    private String nombre;
+    private double precio;
+    
+    public Producto(String nombre, double precio) {
+        this.nombre = nombre;
+        this.precio = precio;
+    }
+    
+    // 2. Sobrescribir el método clone()
+    @Override
+    public Producto clone() {
+        try {
+            // Llama al clone nativo (hace una shallow copy automática de los atributos)
+            return (Producto) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(); // Nunca debería ocurrir si implementas Cloneable
+        }
+    }
+}
+
+// ---- EN EL MAIN ----
+Producto p1 = new Producto("Laptop", 1200.0);
+
+// CLONACIÓN NATIVA: Se crea un objeto nuevo en memoria
+Producto p3 = p1.clone();
+
+p3.setPrecio(999.0);
+System.out.println(p1.getPrecio()); // Imprime: 1200.0 (p1 queda intacto)</code></pre>
+    </div>
+    <div class="mt-4 p-3 bg-blue-500/10 border-l-2 border-l-blue-500 text-xs">
+        <p class="text-blue-300"><i class="fa-solid fa-circle-info mr-1"></i> <strong>Nota:</strong> <code>super.clone()</code> realiza una copia superficial (<em>Shallow Copy</em>). Si tu clase tuviera atributos que fueran otros objetos complejos (ej. listas u otros objetos propios), tendrías que clonarlos manualmente dentro del método <code>clone()</code> para lograr una copia profunda (<em>Deep Copy</em>).</p>
+    </div>
+</div>

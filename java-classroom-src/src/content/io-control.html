@@ -1,0 +1,98 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-blue-500/20 text-blue-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-2"></i></span>
+    I/O, Control y Funciones
+</h2>
+
+<div class="highlight-box p-6 rounded-xl mb-8 mt-8">
+    <h3 class="text-xl font-bold text-accent mb-2"><i class="fa-solid fa-box-open mr-2"></i>Scanner: La "Caja Negra"</h3>
+    <p class="text-slate-300 text-sm leading-relaxed mb-4">
+        Olvídate del <code>scanf</code>. En Java se utilizan <strong>Flujos de Datos (Streams)</strong> y clases para leer datos. 
+        Como aún no dominas la Programación Orientada a Objetos, el profesor te indica usar <code>Scanner</code> como una <em>caja negra</em>: solo apréndete la sintaxis exacta, pon los datos que te pide, y obtén la respuesta. Magia.
+    </p>
+    <ul class="text-sm text-slate-300 list-disc list-inside space-y-1">
+        <li><strong>Regla 1:</strong> Importar arriba: <code>import java.util.Scanner;</code></li>
+        <li><strong>Regla 2:</strong> Instanciar: <code>Scanner leer = new Scanner(System.in);</code></li>
+        <li><strong>Regla 3:</strong> Extraer valores: <code>leer.nextInt()</code>, <code>leer.next()</code>, etc.</li>
+    </ul>
+</div>
+
+<div class="code-wrapper mb-10">
+    <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl shadow-lg border border-white/10 m-0"><code class="language-java">import java.util.Scanner; // Importación OBLIGATORIA
+
+public class pasevalores {
+    public static void main(String[] args){
+        // CAJA NEGRA: Crear el scanner
+        Scanner leer = new Scanner(System.in);
+        
+        // Evita bugs visuales en la terminal con los 'Enters'
+        leer.useDelimiter("\n"); 
+
+        System.out.print("Ingresa un numero entero: ");
+        int dato = leer.nextInt(); // Lee entero de la consola
+        System.out.println("Leiste: " + dato);
+        
+        System.out.print("Ingresa un texto continuo: ");
+        String cadena = leer.next(); // Lee un string
+        System.out.println("Leiste: " + cadena);
+    }
+}</code></pre>
+</div>
+
+<h3 class="text-2xl font-bold text-blue-300 mb-3 mt-10">Estructuras de Control (Repaso)</h3>
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Si sabes C, ya sabes esto. <code>if</code>, <code>for</code>, <code>while</code> y <code>do-while</code> operan idéntico. La única mejora brutal es que en Java el <code>switch</code> <strong>sí permite evaluar Strings</strong>.
+</p>
+<div class="code-wrapper mb-10">
+    <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl shadow-lg border border-white/10 m-0"><code class="language-java">public class Estructuracontrol {
+    public static void main(String[] args){
+        int edad = 17;
+        if (edad >= 18) System.out.println("Mayor");
+        else System.out.println("Menor");
+
+        // Switch evaluando STRINGS (Imposible en C nativo)
+        String mes = "Enero";
+        switch(mes){
+            case "Enero":
+                System.out.println("Primer mes (1)");
+                break;
+            case "Febrero":
+                System.out.println("Segundo mes (2)");
+                break;
+        }
+
+        // Bucle For idéntico
+        System.out.print("For: ");
+        for (int i=0; i<5; i++) System.out.print(i + " ");
+        
+        System.out.print("\nWhile con Break: ");
+        int cont = 0;
+        while(true){
+            if(cont > 3) break;
+            System.out.print(cont + " ");
+            cont++;
+        }
+    }
+}</code></pre>
+</div>
+
+<h3 class="text-2xl font-bold text-blue-300 mb-3 mt-10">Funciones (Métodos)</h3>
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Para hacer una función, simplemente métela en tu clase. Si vas a llamarla directamente desde tu <code>main</code> (que es <code>static</code>), tu función obligatoriamente <strong>debe ser static también</strong>.
+</p>
+<div class="code-wrapper mb-8">
+    <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl shadow-lg border border-white/10 m-0"><code class="language-java">public class funciones {
+    public static void main(String[] args){
+        int resultado = suma(2, 3);
+        System.out.println("Resultado: " + resultado);
+    }
+
+    // public: Todo el mundo la ve
+    // static: Pertenece a la clase, se llama directo
+    public static int suma(int a, int b){
+        return a + b;
+    }
+}</code></pre>
+</div>

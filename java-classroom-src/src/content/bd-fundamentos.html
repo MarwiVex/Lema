@@ -1,0 +1,246 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-blue-500/20 text-blue-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-database"></i></span>
+    17. Fundamentos de Bases de Datos Relacionales y SQL
+</h2>
+
+<p class="text-slate-300 mb-8 text-base leading-relaxed">
+    Mientras que los archivos de texto (<code>.txt</code>, <code>.csv</code>) o binarios (<code>.dat</code>) obligan a cargar y reescribir colecciones completas en memoria, un <strong>Sistema Gestor de Bases de Datos Relacionales (RDBMS)</strong> permite almacenar, relacionar, filtrar y actualizar millones de registros de forma segura, atómica (transacciones ACID) y estructurada mediante el lenguaje estándar <strong>SQL (Structured Query Language)</strong>.
+</p>
+
+<!-- 1. CONCEPTOS TEÓRICOS FUNDAMENTALES -->
+<h3 class="text-2xl font-bold text-blue-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-book-open text-blue-400"></i> 1. Conceptos Clave del Modelo Relacional
+</h3>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="glass p-5 rounded-xl border-t-4 border-t-blue-500">
+        <h4 class="font-bold text-blue-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-table"></i> Tabla, Fila y Columna
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Una <strong>Tabla (Entidad)</strong> equivale a una clase POJO en Java (ej. <code>Cafe</code>). Cada <strong>Columna (Atributo/Campo)</strong> representa una propiedad con su tipo de dato (<code>Productor</code>, <code>Cantidad</code>), y cada <strong>Fila (Tupla/Registro)</strong> es una instancia u objeto concreto guardado.
+        </p>
+    </div>
+
+    <div class="glass p-5 rounded-xl border-t-4 border-t-emerald-500">
+        <h4 class="font-bold text-emerald-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-key"></i> Clave Primaria (Primary Key - PK)
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Identificador único e irrepetible de cada fila (ej. <code>IDCafe</code> o <code>IDVariedad</code>). Nunca puede ser <code>NULL</code>. Suele configurarse como <code>AUTOINCREMENT</code> (SQLite) o <code>AUTO_INCREMENT</code> (MySQL) para que el motor asigne el número automáticamente al insertar.
+        </p>
+    </div>
+
+    <div class="glass p-5 rounded-xl border-t-4 border-t-purple-500">
+        <h4 class="font-bold text-purple-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-link"></i> Clave Foránea (Foreign Key - FK)
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Columna de una tabla hija que apunta a la <code>PRIMARY KEY</code> de otra tabla padre para establecer una relación y garantizar la <strong>integridad referencial</strong> (no puedes registrar un café con una variedad que no exista en <code>VariedadCafe</code>).
+        </p>
+    </div>
+</div>
+
+<!-- DIAGRAMA DE RELACIÓN 1:N DEL PROYECTO BASEDATOS -->
+<div class="glass p-6 rounded-xl border border-white/10 mb-8">
+    <h4 class="font-bold text-cyan-300 mb-3 flex items-center gap-2">
+        <i class="fa-solid fa-diagram-project text-cyan-400"></i> Modelo Entidad-Relación del Proyecto <code>BaseDatos</code> (Relación 1 a Muchos - 1:N)
+    </h4>
+    <p class="text-xs text-slate-300 leading-relaxed mb-4">
+        En la base de datos <code>informacion.db</code> / <code>informacion_db</code> del proyecto, una <strong>Variedad de Café</strong> (ej. <em>1 - Caturra</em>, <em>2 - Negro</em>) puede estar asociada a <strong>muchos lotes de Café</strong>, pero cada lote de Café tiene una sola variedad:
+    </p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 font-mono text-xs">
+        <div class="bg-black/60 p-4 rounded-xl border border-emerald-500/40">
+            <div class="text-emerald-400 font-bold border-b border-white/10 pb-2 mb-2 flex justify-between">
+                <span>TABLA PADRE: VariedadCafe</span>
+                <span class="bg-emerald-500/20 px-2 py-0.5 rounded text-[10px]">1</span>
+            </div>
+            <div class="space-y-1 text-slate-300">
+                <div><i class="fa-solid fa-key text-amber-400 mr-2"></i><strong>IDVariedad</strong> : INTEGER (PK, AI)</div>
+                <div><i class="fa-solid fa-font text-slate-400 mr-2"></i><strong>Descripcion</strong> : TEXT NOT NULL</div>
+            </div>
+            <div class="mt-3 pt-2 border-t border-white/10 text-[11px] text-slate-400">
+                Ejemplo de datos: <code>(1, 'Caturra')</code>, <code>(2, 'Negro')</code>
+            </div>
+        </div>
+
+        <div class="bg-black/60 p-4 rounded-xl border border-blue-500/40">
+            <div class="text-blue-400 font-bold border-b border-white/10 pb-2 mb-2 flex justify-between">
+                <span>TABLA HIJA: Cafe</span>
+                <span class="bg-blue-500/20 px-2 py-0.5 rounded text-[10px]">N (Muchos)</span>
+            </div>
+            <div class="space-y-1 text-slate-300">
+                <div><i class="fa-solid fa-key text-amber-400 mr-2"></i><strong>IDCafe</strong> : INTEGER (PK, AI)</div>
+                <div><i class="fa-solid fa-font text-slate-400 mr-2"></i><strong>Productor</strong> : TEXT NOT NULL</div>
+                <div><i class="fa-solid fa-link text-purple-400 mr-2"></i><strong>VariedadCafe</strong> : INTEGER (FK &rarr; VariedadCafe.IDVariedad)</div>
+                <div><i class="fa-solid fa-hashtag text-cyan-400 mr-2"></i><strong>Cantidad</strong> : REAL NOT NULL</div>
+            </div>
+            <div class="mt-3 pt-2 border-t border-white/10 text-[11px] text-slate-400">
+                Ejemplo: <code>(1, 'El chiringuito', 1, 2.5)</code>, <code>(2, 'FincaSol', 2, 1.0)</code>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. COMPARATIVA SQLITE VS MYSQL -->
+<h3 class="text-2xl font-bold text-emerald-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-scale-balanced text-emerald-400"></i> 2. SQLite vs MySQL: ¿Cuándo usar cada motor?
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    El proyecto <strong>BaseDatos</strong> implementa una arquitectura dual muy interesante: utiliza <strong>MySQL</strong> como servidor principal y <strong>SQLite</strong> como base de datos local de respaldo (<em>fallback</em>). Veamos sus diferencias técnicas:
+</p>
+
+<div class="overflow-x-auto mb-8">
+    <table class="w-full text-left border-collapse glass rounded-xl overflow-hidden text-xs">
+        <thead>
+            <tr class="bg-white/10 text-slate-200 border-b border-white/10">
+                <th class="p-3.5 font-bold">Característica</th>
+                <th class="p-3.5 font-bold text-cyan-300"><i class="fa-solid fa-feather mr-1"></i> SQLite (Embebido / Local)</th>
+                <th class="p-3.5 font-bold text-amber-300"><i class="fa-solid fa-server mr-1"></i> MySQL / MariaDB (Cliente-Servidor)</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5 text-slate-300">
+            <tr>
+                <td class="p-3 font-semibold text-white">Arquitectura</td>
+                <td class="p-3">Sin servidor (<em>Serverless</em>). Toda la BD reside en un único archivo en disco (<code>informacion.db</code>).</td>
+                <td class="p-3">Motor Cliente-Servidor que escucha peticiones por red en un puerto TCP (por defecto <code>3306</code>).</td>
+            </tr>
+            <tr>
+                <td class="p-3 font-semibold text-white">URL JDBC</td>
+                <td class="p-3"><code>jdbc:sqlite:informacion.db</code></td>
+                <td class="p-3"><code>jdbc:mysql://localhost:3306/informacion_db</code></td>
+            </tr>
+            <tr>
+                <td class="p-3 font-semibold text-white">Autenticación</td>
+                <td class="p-3">No tiene usuarios ni contraseñas (depende de los permisos del archivo en el SO).</td>
+                <td class="p-3">Requiere usuario (ej. <code>root</code>), contraseña y permisos por host/base de datos.</td>
+            </tr>
+            <tr>
+                <td class="p-3 font-semibold text-white">Tipos de Datos</td>
+                <td class="p-3">Tipado dinámico por afinidad: <code>INTEGER</code>, <code>TEXT</code>, <code>REAL</code>, <code>NUMERIC</code>, <code>BLOB</code>.</td>
+                <td class="p-3">Tipado estricto: <code>INT</code>, <code>VARCHAR(n)</code>, <code>FLOAT</code>, <code>DOUBLE</code>, <code>DECIMAL</code>, <code>DATE</code>.</td>
+            </tr>
+            <tr>
+                <td class="p-3 font-semibold text-white">Herramienta Visual</td>
+                <td class="p-3"><strong>DB Browser for SQLite</strong></td>
+                <td class="p-3"><strong>XAMPP + phpMyAdmin</strong> / MySQL Workbench</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- 3. DDL: CREACIÓN DE TABLAS -->
+<h3 class="text-2xl font-bold text-cyan-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-hammer text-cyan-400"></i> 3. SQL DDL (Data Definition Language): Creando las Tablas del Proyecto
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    El sublenguaje <strong>DDL</strong> (<code>CREATE</code>, <code>ALTER</code>, <code>DROP</code>) define la estructura de las tablas. Observa la pequeña diferencia sintáctica entre el autoincremento de SQLite (<code>AUTOINCREMENT</code>) y el de MySQL (<code>AUTO_INCREMENT</code>):
+</p>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Script SQLite -->
+    <div class="code-wrapper relative pt-6">
+        <div class="absolute top-0 left-0 bg-cyan-500/20 text-cyan-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-solid fa-code text-cyan-300 text-sm"></i> Esquema en SQLite (informacion.db)
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-sql">-- 1. Tabla Padre: VariedadCafe
+CREATE TABLE "VariedadCafe" (
+    "IDVariedad"  INTEGER NOT NULL,
+    "Descripcion" TEXT NOT NULL,
+    PRIMARY KEY("IDVariedad" AUTOINCREMENT)
+);
+
+-- 2. Tabla Hija: Cafe
+CREATE TABLE "Cafe" (
+    "IDCafe"       INTEGER,
+    "Productor"    TEXT NOT NULL,
+    "VariedadCafe" INTEGER NOT NULL,
+    "Cantidad"     REAL NOT NULL,
+    PRIMARY KEY("IDCafe" AUTOINCREMENT),
+    FOREIGN KEY("VariedadCafe")
+        REFERENCES "VariedadCafe"("IDVariedad")
+);</code></pre>
+    </div>
+
+    <!-- Script MySQL -->
+    <div class="code-wrapper relative pt-6">
+        <div class="absolute top-0 left-0 bg-amber-500/20 text-amber-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-solid fa-server text-amber-300 text-sm"></i> Esquema en MySQL / XAMPP (informacion_db)
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-sql">CREATE DATABASE IF NOT EXISTS informacion_db;
+USE informacion_db;
+
+-- 1. Tabla Padre: VariedadCafe
+CREATE TABLE VariedadCafe (
+    IDVariedad INT NOT NULL AUTO_INCREMENT,
+    Descripcion VARCHAR(100) NOT NULL,
+    PRIMARY KEY (IDVariedad)
+);
+
+-- 2. Tabla Hija: Cafe
+CREATE TABLE Cafe (
+    IDCafe INT NOT NULL AUTO_INCREMENT,
+    Productor VARCHAR(150) NOT NULL,
+    VariedadCafe INT NOT NULL,
+    Cantidad FLOAT NOT NULL,
+    PRIMARY KEY (IDCafe),
+    FOREIGN KEY (VariedadCafe)
+        REFERENCES VariedadCafe(IDVariedad)
+);</code></pre>
+    </div>
+</div>
+
+<!-- 4. DML Y DQL: OPERACIONES CRUD Y JOINS -->
+<h3 class="text-2xl font-bold text-purple-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-magnifying-glass-chart text-purple-400"></i> 4. SQL DML & DQL: Las 4 Operaciones CRUD e <code>INNER JOIN</code>
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Todo sistema de base de datos se apoya en el acrónimo <strong>CRUD</strong>: <strong>C</strong>reate (<code>INSERT</code>), <strong>R</strong>ead (<code>SELECT</code>), <strong>U</strong>pdate (<code>UPDATE</code>) y <strong>D</strong>elete (<code>DELETE</code>). Estas son exactamente las sentencias que ejecuta <code>AdmonCafe.java</code>:
+</p>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-purple-500/20 text-purple-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-solid fa-terminal text-purple-300 text-sm"></i> Operaciones CRUD completas + INNER JOIN
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-sql">-- ==========================================
+-- 1. CREATE (Insertar nuevos registros)
+-- ==========================================
+INSERT INTO VariedadCafe (Descripcion) VALUES ('Caturra');
+INSERT INTO VariedadCafe (Descripcion) VALUES ('Negro');
+
+INSERT INTO Cafe (Productor, VariedadCafe, Cantidad) VALUES ('El chiringuito', 1, 2.5);
+INSERT INTO Cafe (Productor, VariedadCafe, Cantidad) VALUES ('FincaSol', 2, 1.0);
+
+-- ==========================================
+-- 2. READ (Consultar registros)
+-- ==========================================
+-- Consulta simple de toda la tabla
+SELECT * FROM Cafe;
+
+-- Consulta combinada (INNER JOIN) para ver el nombre de la variedad en lugar de solo su ID numérico
+SELECT c.IDCafe, c.Productor, v.Descripcion AS NombreVariedad, c.Cantidad
+FROM Cafe c
+INNER JOIN VariedadCafe v ON c.VariedadCafe = v.IDVariedad
+WHERE c.Cantidad >= 1.0
+ORDER BY c.IDCafe ASC;
+
+-- ==========================================
+-- 3. UPDATE (Modificar un registro existente)
+-- ¡NUNCA OLVIDES EL WHERE O ACTUALIZARÁS TODA LA TABLA!
+-- ==========================================
+UPDATE Cafe
+SET Productor = 'Finca Sol Premium', VariedadCafe = 1, Cantidad = 4.75
+WHERE IDCafe = 2;
+
+-- ==========================================
+-- 4. DELETE (Borrar un registro específico)
+-- ¡NUNCA OLVIDES EL WHERE O VACIARÁS TODA LA TABLA!
+-- ==========================================
+DELETE FROM Cafe WHERE IDCafe = 2;</code></pre>
+</div>

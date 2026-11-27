@@ -1,0 +1,90 @@
+\documentclass[10pt, landscape, twocolumn]{article}
+
+% --- Librerías Requeridas ---
+\usepackage[margin=0.5in, columnsep=0.4in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{xcolor}
+\usepackage{tabularx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, calc}
+\usepackage{enumitem}
+\usepackage{mathpazo} % Tipografía Palatino
+\usepackage{booktabs}
+
+% --- Configuración de Formato ---
+\pagestyle{empty} % Sin números de página
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2pt}
+
+% Ajuste de espacios en ecuaciones
+\AtBeginDocument{
+  \setlength{\abovedisplayskip}{3pt}
+  \setlength{\belowdisplayskip}{3pt}
+  \setlength{\abovedisplayshortskip}{1pt}
+  \setlength{\belowdisplayshortskip}{1pt}
+}
+
+% --- Definición de Colores ---
+\definecolor{themeblue}{RGB}{0, 90, 160}
+\definecolor{themegray}{RGB}{80, 80, 80}
+
+% --- Comandos Personalizados para Títulos ---
+\newcommand{\cheatsheetsection}[1]{
+    \vspace{0.6em}
+    {\color{themeblue}\large\bfseries #1} \par
+    \vspace{-0.5em}
+    {\color{themeblue}\rule{\linewidth}{1pt}} \par
+    \vspace{0.2em}
+}
+
+\newcommand{\cheatsheetsubsection}[1]{
+    \vspace{0.4em}
+    {\color{themeblue}\normalsize\bfseries #1} \par
+    \vspace{0.1em}
+}
+
+% --- Inicio del Documento ---
+\begin{document}
+
+% --- Cabecera ---
+\begin{center}
+    \vspace{-1em}
+    {\color{themeblue}\huge\bfseries Título de la Plantilla Basal}\\[0.1em]
+    {\color{themegray}\small Subtítulo descriptivo o guía rápida para el tema seleccionado}\\[0.4em]
+    {\color{themegray}\footnotesize \textbf{Por Tu Nombre Aquí}}
+\end{center}
+\vspace{-1em}
+
+% --- Sección de Ejemplo ---
+\cheatsheetsection{Primera Sección de Ejemplo}
+Este es un ejemplo de texto genérico para verificar el comportamiento de la tipografía y los márgenes en las dos columnas. Puedes añadir ecuaciones en línea como $E = mc^2$ o en bloques:
+\[ \int_{a}^{b} f(x) \, dx = F(b) - F(a) \]
+
+% --- Subsección de Ejemplo ---
+\cheatsheetsubsection{Subsección Detallada}
+Aquí puedes incluir listas o descripciones más específicas:
+\begin{itemize}[leftmargin=*, nosep]
+    \item Primer punto de importancia.
+    \item Segundo concepto clave con una nota adicional.
+    \item Tercer elemento de la lista.
+\end{itemize}
+
+% --- Ejemplo de Tabla ---
+\cheatsheetsection{Referencia de Datos (Tabla)}
+\vspace{0.2em}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{|p{0.3\linewidth}|X|}
+\hline
+\textbf{Categoría} & \textbf{Descripción o Aplicación} \\ \hline
+Concepto A & Descripción detallada de cómo aplicar este concepto en un entorno práctico. \\ \hline
+Concepto B & Nota sobre las limitaciones o excepciones de esta regla específica. \\ \hline
+Fórmula C & $\nabla \cdot \mathbf{B} = 0$ - Breve explicación de la ley física. \\ \hline
+\end{tabularx}
+
+\vspace{1em}
+\cheatsheetsection{Segunda Sección}
+Puedes continuar escribiendo aquí. LaTeX balanceará las columnas automáticamente o puedes forzar un salto de columna con el comando \texttt{\textbackslash columnbreak} o empezar una página nueva con \texttt{\textbackslash newpage}.
+
+% --- Espacio para más contenido ---
+
+\end{document}

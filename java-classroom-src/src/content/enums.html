@@ -1,0 +1,94 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-amber-500/20 text-amber-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-list-ol"></i></span>
+    Tipos Enumerados (Enums)
+</h2>
+
+<p class="text-slate-300 mb-8 text-base leading-relaxed">
+    En ocasiones, una variable solo debería poder tomar un conjunto específico de valores predefinidos. Por ejemplo, los días de la semana, los meses del año, o el estado de un producto (Activo o Descontinuado). Para evitar errores usando cadenas de texto libres (Strings), Java provee los <strong>Enumerators (Enums)</strong>.
+</p>
+
+<!-- 1. CREANDO UN ENUM -->
+<h3 class="text-2xl font-bold text-amber-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-cube text-amber-400"></i> 1. Definiendo un Enum
+</h3>
+
+<div class="glass p-6 rounded-xl border-l-4 border-l-amber-500 mb-6">
+    <p class="text-sm text-slate-300 leading-relaxed mb-4">
+        Un <code>enum</code> es un tipo de clase especial que representa un grupo de constantes invariables. Se declaran usando la palabra reservada <code>enum</code> en lugar de <code>class</code>. Por convención, las constantes se escriben en <strong>MAYÚSCULAS</strong>.
+    </p>
+    
+    <div class="code-wrapper relative pt-6 mb-4">
+        <div class="absolute top-0 left-0 bg-amber-500/20 text-amber-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-brands fa-java text-amber-300 text-sm"></i> ESTADO.java
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">public enum ESTADO {
+    ACTIVO, DESCONTINUADO
+}</code></pre>
+    </div>
+</div>
+
+<!-- 2. USANDO EL ENUM -->
+<h3 class="text-2xl font-bold text-emerald-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-code-merge text-emerald-400"></i> 2. Aplicando Enums en Clases
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Podemos usar el Enum como si fuera cualquier otro tipo de dato en nuestras clases, asegurando de esta forma que nadie pueda asignar un valor que no sea <code>ACTIVO</code> o <code>DESCONTINUADO</code>.
+</p>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-emerald-300 text-sm"></i> Producto.java
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">public class Producto {
+    private String SKU;
+    // La variable de estado usa el tipo de dato ESTADO (el Enum)
+    private ESTADO estado;
+    
+    public Producto(String SKU, ESTADO estado) {
+        this.SKU = SKU;
+        this.estado = estado;
+    }
+    
+    public void imprimirEstado() {
+        // Uso simple en condicionales
+        if (this.estado == ESTADO.ACTIVO) {
+            System.out.println("El producto se puede vender.");
+        } else {
+            System.out.println("El producto ya no se vende.");
+        }
+    }
+}</code></pre>
+</div>
+
+<!-- 3. DE STRING A ENUM (valueOf) -->
+<h3 class="text-2xl font-bold text-blue-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-right-left text-blue-400"></i> 3. Conversión desde Archivos de Texto
+</h3>
+
+<div class="glass p-6 rounded-xl border border-blue-500/30 mb-8">
+    <h4 class="font-bold text-blue-300 mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-file-lines text-blue-400"></i> <code>ESTADO.valueOf(String)</code>
+    </h4>
+    <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+        Cuando leemos datos de un archivo de texto, obtenemos un <code>String</code> puro (por ejemplo, <code>"ACTIVO"</code>). Para convertir ese texto de vuelta a un objeto Enum, utilizamos el método estático <code>valueOf()</code>, el cual ya viene incluido automáticamente por Java en todos los enums.
+    </p>
+
+    <div class="bg-black/60 p-4 rounded-lg text-xs font-mono text-slate-300">
+        <span class="text-emerald-400">// Supongamos que leemos una línea del archivo</span><br>
+        String linea = "JUGUETE|SKU123|<span class="text-amber-300">ACTIVO</span>|Pelota";<br>
+        String[] datos = linea.split("\\|");<br><br>
+        
+        <span class="text-emerald-400">// Extraemos el texto "ACTIVO" en datos[2] y lo convertimos a Enum</span><br>
+        <span class="text-rose-300">ESTADO estadoProducto = ESTADO.valueOf(datos[2]);</span><br><br>
+        
+        <span class="text-emerald-400">// Ahora ya podemos crear nuestro objeto seguro</span><br>
+        Producto p = new Producto(datos[1], estadoProducto);
+    </div>
+    
+    <div class="mt-4 p-3 bg-rose-500/10 border-l-2 border-l-rose-500 text-xs">
+        <p class="text-rose-300"><i class="fa-solid fa-triangle-exclamation mr-1"></i> <strong>Cuidado:</strong> Si el string no coincide <strong>exactamente</strong> con el nombre del enum (por ejemplo, "Activo" o " ACTIVO " con espacios), <code>valueOf</code> lanzará una excepción <code>IllegalArgumentException</code>.</p>
+    </div>
+</div>

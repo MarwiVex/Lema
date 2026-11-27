@@ -1,0 +1,230 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-blue-500/20 text-blue-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-5"></i></span>
+    Programación Orientada a Objetos (POO)
+</h2>
+
+<p class="text-slate-300 mb-6 text-base leading-relaxed">
+    La Programación Orientada a Objetos (POO) es el paradigma principal en Java. Se basa en organizar el código modelando entidades del mundo real llamadas "objetos".
+</p>
+
+<h3 class="text-2xl font-bold text-blue-300 mb-4 mt-8">Conceptos Fundamentales</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+    <div class="bg-black/40 border border-white/5 p-5 rounded-xl border-l-4 border-l-blue-500 hover:bg-white/5 transition-colors">
+        <h4 class="font-bold text-blue-400 mb-2">Clase</h4>
+        <p class="text-sm text-slate-300">Plantilla o molde abstracto que define los atributos (datos/estado) y métodos (comportamientos) que compartirán los objetos creados a partir de ella.</p>
+    </div>
+    <div class="bg-black/40 border border-white/5 p-5 rounded-xl border-l-4 border-l-emerald-500 hover:bg-white/5 transition-colors">
+        <h4 class="font-bold text-emerald-400 mb-2">Objeto</h4>
+        <p class="text-sm text-slate-300">Unidad básica en POO que combina estado (variables) y comportamiento (funciones).</p>
+    </div>
+    <div class="bg-black/40 border border-white/5 p-5 rounded-xl border-l-4 border-l-purple-500 hover:bg-white/5 transition-colors">
+        <h4 class="font-bold text-purple-400 mb-2">Instancia</h4>
+        <p class="text-sm text-slate-300">La materialización concreta e individualizada en memoria de una clase. (Ocurre cuando utilizas la palabra reservada <code>new</code>).</p>
+    </div>
+    <div class="bg-black/40 border border-white/5 p-5 rounded-xl border-l-4 border-l-amber-500 hover:bg-white/5 transition-colors">
+        <h4 class="font-bold text-amber-400 mb-2">Método</h4>
+        <p class="text-sm text-slate-300">Subrutina o función definida dentro de una clase que opera sobre los datos del objeto o realiza una tarea específica.</p>
+    </div>
+</div>
+
+<h3 class="text-2xl font-bold text-blue-300 mb-4 mt-12">Los 4 Pilares de la POO</h3>
+<div class="space-y-4 mb-10">
+    <div class="glass p-5 rounded-xl relative overflow-hidden group">
+        <div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
+        <h4 class="font-bold text-blue-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-eye-slash w-5 text-center"></i> Abstracción</h4>
+        <p class="text-sm text-slate-300 ml-7">Proceso de modelar únicamente las características y comportamientos esenciales de una entidad del mundo real, omitiendo detalles irrelevantes de implementación.</p>
+    </div>
+    <div class="glass p-5 rounded-xl relative overflow-hidden group">
+        <div class="absolute top-0 left-0 w-1 h-full bg-emerald-400"></div>
+        <h4 class="font-bold text-emerald-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-box w-5 text-center"></i> Encapsulamiento</h4>
+        <p class="text-sm text-slate-300 ml-7">Ocultamiento de los detalles internos del estado de un objeto, exponiendo solo interfaces públicas seguras para interactuar con él (control de acceso mediante modificadores como <code>private</code>, <code>protected</code>, <code>public</code>).</p>
+    </div>
+    <div class="glass p-5 rounded-xl relative overflow-hidden group">
+        <div class="absolute top-0 left-0 w-1 h-full bg-purple-400"></div>
+        <h4 class="font-bold text-purple-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-sitemap w-5 text-center"></i> Herencia</h4>
+        <p class="text-sm text-slate-300 ml-7">Mecanismo que permite a una nueva clase (subclase) derivar atributos y métodos de una clase existente (superclase), promoviendo la reutilización de código.</p>
+    </div>
+    <div class="glass p-5 rounded-xl relative overflow-hidden group">
+        <div class="absolute top-0 left-0 w-1 h-full bg-amber-400"></div>
+        <h4 class="font-bold text-amber-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-shapes w-5 text-center"></i> Polimorfismo</h4>
+        <p class="text-sm text-slate-300 ml-7">Capacidad de tratar objetos de distintas subclases como instancias de una superclase común, permitiendo que un mismo método ejecute comportamientos diferentes según el objeto receptor (mediante <em>overriding</em> o <em>overloading</em>).</p>
+    </div>
+</div>
+
+<h3 class="text-2xl font-bold text-blue-300 mb-4 mt-12">Ejemplo Corregido en Java</h3>
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Para que el programa sea ejecutable de forma estándar en Java, la firma del método <code>main</code> requiere <code>public static void main(String[] args)</code>, los identificadores de variables deben seguir las convenciones de <em>camelCase</em>, la sintaxis de invocar métodos exige paréntesis <code>()</code>, y el formato de los especificadores (<code>%d</code>, <code>%s</code>) debe coincidir rigurosamente con los tipos de datos.
+</p>
+
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8 mt-6">
+    <!-- Alumno.java -->
+    <div class="code-wrapper relative pt-6">
+        <div class="absolute top-0 left-0 bg-blue-500/20 text-blue-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-brands fa-java text-blue-300 text-sm"></i> Alumno.java
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">class Alumno {
+    // Atributos de clase
+    String nombre;
+    int edad;
+    int nua;
+
+    // Métodos
+    String imprimir() {
+        return String.format("%d, %s, %d\n", nua, nombre, edad);
+    }
+
+    void imprimirClase() {
+        System.out.printf("%s, %d, %d\n", nombre, edad, nua);
+    }
+}</code></pre>
+    </div>
+
+    <!-- Principal.java -->
+    <div class="code-wrapper relative pt-6">
+        <div class="absolute top-0 left-0 bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-brands fa-java text-emerald-300 text-sm"></i> Principal.java
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">public class Principal {
+    public static void main(String[] args) {
+        // Creación e instanciación del objeto alumno1
+        Alumno alumno1 = new Alumno();
+
+        // Asignación de valores
+        alumno1.edad = 18;
+        alumno1.nombre = "Hola";
+        alumno1.nua = 676767;
+
+        // Invocación de métodos
+        System.out.print(alumno1.imprimir());
+        alumno1.imprimirClase();
+    }
+}</code></pre>
+    </div>
+</div>
+
+<div class="mt-4 p-4 bg-blue-900/20 border border-blue-500/20 rounded-xl text-xs text-blue-200">
+    <p><i class="fa-solid fa-circle-info text-blue-400 mr-2"></i><strong>Nota para compilar:</strong> En este ejemplo básico, ambas clases pueden ir en el mismo archivo para el compilador web, asegurándote que sólo la clase <code>Principal</code> tenga la palabra <code>public</code>.</p>
+</div>
+
+<!-- Nueva Sección: Importancia de Private y Public (Encapsulamiento Real y Validación) -->
+<h3 class="text-2xl font-bold text-blue-300 mb-4 mt-14 flex items-center gap-3">
+    <span class="bg-emerald-500/20 text-emerald-400 p-2 rounded-lg text-lg"><i class="fa-solid fa-user-shield"></i></span>
+    Importancia de <code>private</code> vs <code>public</code> (Encapsulamiento y Protección)
+</h3>
+
+<p class="text-slate-300 mb-6 text-base leading-relaxed">
+    El verdadero objetivo del <strong>Encapsulamiento</strong> no es solo esconder código, sino <strong>garantizar la integridad de los datos</strong>. Al marcar un atributo como <code>private</code>, impedimos que cualquier código externo modifique el valor directamente sin pasar por nuestras reglas de negocio.
+</p>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="glass p-6 rounded-xl border-l-4 border-l-rose-500">
+        <h4 class="font-bold text-rose-400 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation text-rose-400"></i> Con Atributos Públicos (Sin Control)
+        </h4>
+        <p class="text-sm text-slate-300 leading-relaxed">
+            Si la variable <code>edad</code> fuera <code>public</code>, desde cualquier parte del programa podrían asignarle valores absurdos (por ejemplo: <code>alumno1.edad = -50;</code> o <code>alumno1.edad = 999;</code>). No existe ninguna barrera para evitar datos corruptos o imposibles.
+        </p>
+    </div>
+
+    <div class="glass p-6 rounded-xl border-l-4 border-l-emerald-500">
+        <h4 class="font-bold text-emerald-400 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-shield-halved text-emerald-400"></i> Con Atributos Privados y Setters (Con Protección)
+        </h4>
+        <p class="text-sm text-slate-300 leading-relaxed">
+            Al definir <code>private int edad;</code>, forzamos el uso de un método setter (<code>setEdad(valor)</code>) donde definimos una <strong>condición de rango</strong>. Sin importar de dónde se intente modificar la edad, la clase rechazará valores fuera de la regla (ej. 15 a 100 años).
+        </p>
+    </div>
+</div>
+
+<!-- Ejemplo Completo Encapsulado -->
+<h4 class="text-xl font-bold text-slate-200 mb-3 flex items-center gap-2">
+    <i class="fa-solid fa-code text-blue-400"></i> Ejemplo Práctico: Validación de Rango con Getters y Setters
+</h4>
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Observa cómo la clase <code>Alumno</code> restringe sus atributos con <code>private</code> y expone métodos <code>public</code> (Getters y Setters) para leer y validar la información de manera segura:
+</p>
+
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8 mt-4">
+    <!-- Alumno.java con Encapsulamiento -->
+    <div class="code-wrapper relative pt-6">
+        <div class="absolute top-0 left-0 bg-blue-500/20 text-blue-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-brands fa-java text-blue-300 text-sm"></i> Alumno.java (Encapsulado)
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">public class Alumno {
+    // Atributos PRIVADOS (Protegidos contra acceso directo)
+    private String nombre;
+    private int edad;
+    private int nua;
+
+    // Setters (Métodos para modificar datos con validación)
+    public void setNombre(String valor) {
+        this.nombre = valor;
+    }
+
+    public void setEdad(int valor) {
+        // Regla de validación: La edad debe estar en un rango permitido (15 a 100 años)
+        if (valor >= 15 && valor <= 100) {
+            this.edad = valor;
+        } else {
+            System.out.println("⚠️ Error: La edad " + valor + " no está en el rango permitido (15-100). No se asignó.");
+        }
+    }
+
+    public void setNUA(int valor) {
+        this.nua = valor;
+    }
+
+    // Getters (Métodos públicos para leer valores)
+    public String getNombre() {
+        return this.nombre;
+    }
+
+    public int getEdad() {
+        return this.edad;
+    }
+
+    public int getNUA() {
+        return this.nua;
+    }
+
+    // Método de impresión
+    public String imprimir() {
+        return String.format("%d, %s, %d \n", nua, nombre, edad);
+    }
+}</code></pre>
+    </div>
+
+    <!-- Principal.java -->
+    <div class="code-wrapper relative pt-6">
+        <div class="absolute top-0 left-0 bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-brands fa-java text-emerald-300 text-sm"></i> Principal.java
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">public class Principal {
+    public static void main(String[] args) {
+        Alumno alumno1 = new Alumno();
+
+        // 1. Asignaciones válidas usando Setters
+        alumno1.setNombre("Juan");
+        alumno1.setEdad(18); // Válido (dentro del rango 15-100)
+        alumno1.setNUA(213232);
+
+        System.out.print(alumno1.imprimir());
+
+        // 2. Intento de asignación fuera de rango
+        alumno1.setEdad(200); // ❌ Error de validación: Se rechaza el 200 y se conserva 18
+
+        // 3. Intento de acceso directo si la variable fuera private
+        // alumno1.edad = 250; ❌ Error de compilación: 'edad' tiene acceso privado en Alumno
+    }
+}</code></pre>
+    </div>
+</div>
+
+<div class="mt-4 p-4 bg-emerald-900/20 border border-emerald-500/20 rounded-xl text-xs text-emerald-200">
+    <p><i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i><strong>Punto Clave:</strong> Si los atributos fueran <code>public</code>, cualquier programador podría hacer <code>alumno1.edad = 250;</code> saltándose la condición. Con <code>private</code> y <code>setEdad()</code>, aseguramos que la regla de negocio se cumpla SIEMPRE, sin importar desde dónde se invoque.</p>
+</div>
+

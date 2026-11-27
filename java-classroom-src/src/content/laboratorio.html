@@ -1,0 +1,50 @@
+<h2 class="text-3xl font-bold mb-4 flex items-center gap-3 text-emerald-400">
+    <i class="fa-solid fa-flask"></i>
+    Laboratorio
+</h2>
+
+<p class="text-slate-300 mb-8 text-sm">Aplica lo aprendido. Usa la <strong>Terminal Global</strong> de la derecha para escribir, resolver y ejecutar estos retos.</p>
+
+<div class="flex flex-col gap-8">
+    <!-- Reto 1 -->
+    <div class="bg-black/40 border border-white/5 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+        <h4 class="text-xl font-bold text-blue-400 mb-3">Reto 1: Scanner y Arreglos</h4>
+        <p class="text-sm text-slate-300 mb-4 leading-relaxed">
+            <strong>Objetivo:</strong> Crea un programa que declare un arreglo 1D vacío de tamaño 3. <br>
+            Usa la caja negra (<code>Scanner</code>) para pedirle al usuario 3 números en la consola dentro de un ciclo <code>for</code> y guárdalos en el arreglo. Al final, imprime todo usando el bucle <code>for-each</code>.
+        </p>
+        
+        <button onclick="toggleHint('hint1')" class="text-xs font-semibold bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors"><i class="fa-solid fa-eye mr-2"></i>Ver Pista</button>
+        <div id="hint1" class="hidden mt-4 p-4 bg-blue-900/20 border border-blue-500/20 rounded-lg text-sm text-blue-200 font-mono">
+            import java.util.Scanner;<br><br>
+            Scanner sc = new Scanner(System.in);<br>
+            int[] arr = new int[3];<br>
+            // Haz un for usando i < arr.length<br>
+            // Dentro pon arr[i] = sc.nextInt();
+        </div>
+    </div>
+
+    <!-- Reto 2 -->
+    <div class="bg-black/40 border border-emerald-500/10 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
+        <h4 class="text-xl font-bold text-emerald-400 mb-3">Reto 2: Rompiendo la Copia Fantasma</h4>
+        <p class="text-sm text-slate-300 mb-4 leading-relaxed">
+            <strong>Objetivo:</strong> Entender el caos y curarlo.<br>
+            1. Crea <code>int[][] matriz = {{10,20}, {30,40}};</code><br>
+            2. Haz una copia mala: <code>int[][] mala = matriz.clone();</code><br>
+            3. Modifica <code>mala[0][0] = 99;</code> y luego imprime <code>matriz[0][0]</code>. Verás que se rompió la original.<br>
+            4. Elimina la copia mala e implementa tú mismo la <strong>Copia Profunda</strong> con doble ciclo <code>for</code>. Demuestra que modificar la copia ya no afecta el original.
+        </p>
+        <button onclick="toggleHint('hint2')" class="text-xs font-semibold bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 px-4 py-2 rounded-lg transition-colors"><i class="fa-solid fa-check mr-2"></i>Ver Solución Parcial</button>
+        <div id="hint2" class="hidden mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-sm text-emerald-200 font-mono">
+            int[][] copiaFinal = new int[matriz.length][];<br>
+            for(int i=0; i &lt; matriz.length; i++){<br>
+            &nbsp;&nbsp;copiaFinal[i] = new int[matriz[i].length]; // Aísla la fila<br>
+            &nbsp;&nbsp;for(int j=0; j &lt; matriz[i].length; j++){<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;copiaFinal[i][j] = matriz[i][j]; // Copia el valor<br>
+            &nbsp;&nbsp;}<br>
+            }
+        </div>
+    </div>
+</div>

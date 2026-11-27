@@ -1,0 +1,140 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-indigo-500/20 text-indigo-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-plug"></i></span>
+    Interfaces, Comparable y Comparator
+</h2>
+
+<p class="text-slate-300 mb-8 text-base leading-relaxed">
+    Las interfaces son una de las herramientas más potentes en Java para lograr abstracción y polimorfismo puro. Además, aprenderemos a utilizar las interfaces nativas de Java <code>Comparable</code> y <code>Comparator</code> para dotar a nuestros objetos de la capacidad de ordenarse automáticamente.
+</p>
+
+<!-- 1. ¿QUÉ ES UNA INTERFAZ? -->
+<h3 class="text-2xl font-bold text-indigo-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-file-contract text-indigo-400"></i> 1. ¿Qué es una Interfaz?
+</h3>
+
+<div class="glass p-6 rounded-xl border-l-4 border-l-indigo-500 mb-6">
+    <p class="text-sm text-slate-300 leading-relaxed mb-4">
+        Una interfaz es como un <strong>contrato estricto</strong>. Define <em>qué</em> debe hacer una clase (los nombres de los métodos), pero no <em>cómo</em> lo hace (sin cuerpo de método). Si una clase dice que implementa una interfaz, está obligada a proveer el código para todos los métodos definidos en ella.
+    </p>
+    <div class="bg-black/40 p-4 rounded-lg font-mono text-xs text-slate-300 border border-white/10">
+        <span class="text-indigo-400 font-bold block mb-2">// Definición de la interfaz</span>
+        <span class="text-slate-300">public interface Imprimible {</span><br>
+        <span class="text-slate-400 pl-4">void imprimirTicket(); </span><span class="text-slate-500">// Método sin cuerpo (abstracto por defecto)</span><br>
+        <span class="text-slate-300">}</span><br><br>
+        
+        <span class="text-emerald-400 font-bold block mb-2">// Implementación en una clase</span>
+        <span class="text-slate-300">public class Producto implements Imprimible {</span><br>
+        <span class="text-slate-400 pl-4">@Override</span><br>
+        <span class="text-slate-400 pl-4">public void imprimirTicket() {</span><br>
+        <span class="text-slate-400 pl-8">System.out.println("Imprimiendo ticket del producto...");</span><br>
+        <span class="text-slate-400 pl-4">}</span><br>
+        <span class="text-slate-300">}</span>
+    </div>
+</div>
+
+<!-- 2. LA INTERFAZ COMPARABLE -->
+<h3 class="text-2xl font-bold text-emerald-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-sort-alpha-down text-emerald-400"></i> 2. Ordenamiento Natural: <code>Comparable&lt;T&gt;</code>
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    La interfaz <code>Comparable</code> se implementa en la misma clase del objeto que queremos ordenar. Define cuál es el <strong>criterio de ordenamiento por defecto (natural)</strong> de esa clase. Solo nos obliga a implementar un método: <code>compareTo(T o)</code>.
+</p>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-emerald-300 text-sm"></i> Producto.java
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">public abstract class Producto implements Comparable<Producto> {
+    protected String SKU;
+    
+    public String getSKU() { return SKU; }
+
+    @Override
+    public int compareTo(Producto otroProducto) {
+        // Orden natural: por el atributo String SKU alfabéticamente
+        return this.SKU.compareTo(otroProducto.getSKU());
+        
+        // Si fuera un número entero (ej: id):
+        // return Integer.compare(this.id, otroProducto.getId());
+    }
+}</code></pre>
+</div>
+<p class="text-xs text-slate-400 mb-6 italic">Al hacer esto, puedes llamar a <code>listaProductos.sort(null)</code> y Java ordenará automáticamente los productos por SKU.</p>
+
+
+<!-- 3. LA INTERFAZ COMPARATOR -->
+<h3 class="text-2xl font-bold text-amber-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-arrows-split-up-and-left text-amber-400"></i> 3. Múltiples Criterios: <code>Comparator&lt;T&gt;</code>
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    ¿Qué pasa si queremos ordenar a veces por SKU, a veces por Nombre, y a veces por Tipo? Como <code>Comparable</code> solo permite un orden natural, usamos <code>Comparator</code> para definir <strong>criterios de ordenamiento externos y múltiples</strong>.
+</p>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="code-wrapper relative pt-6">
+        <div class="absolute top-0 left-0 bg-amber-500/20 text-amber-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-brands fa-java text-amber-300 text-sm"></i> ComparadorPorNombre.java
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0 h-full"><code class="language-java">import java.util.Comparator;
+
+public class ComparadorPorNombre implements Comparator<Producto> {
+    @Override
+    public int compare(Producto p1, Producto p2) {
+        // Asumiendo que existe un getTitulo() o getNombre() 
+        // dependiendo de la estructura
+        return p1.getNombre().compareTo(p2.getNombre());
+    }
+}</code></pre>
+    </div>
+
+    <div class="code-wrapper relative pt-6">
+        <div class="absolute top-0 left-0 bg-rose-500/20 text-rose-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-brands fa-java text-rose-300 text-sm"></i> ComparadorPorTipoYSKU.java
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0 h-full"><code class="language-java">import java.util.Comparator;
+
+public class ComparadorPorTipoYSKU implements Comparator<Producto> {
+    @Override
+    public int compare(Producto p1, Producto p2) {
+        // 1. Primero comparamos por la clase (Juguete vs Pelicula)
+        int tipoComparacion = p1.getClass().getSimpleName()
+                                .compareTo(p2.getClass().getSimpleName());
+        
+        // 2. Si son del mismo tipo (empate == 0), comparamos por SKU
+        if (tipoComparacion == 0) {
+            return p1.getSKU().compareTo(p2.getSKU());
+        }
+        
+        return tipoComparacion;
+    }
+}</code></pre>
+    </div>
+</div>
+
+<!-- 4. APLICANDO EL ORDENAMIENTO -->
+<div class="glass p-6 rounded-xl border border-blue-500/30 mb-8">
+    <h4 class="font-bold text-blue-300 mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-play text-blue-400"></i> Aplicando el Ordenamiento a una Lista
+    </h4>
+    <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+        Una vez implementados el Comparable y los Comparators, podemos pasarlos al método <code>sort()</code> de nuestra colección.
+    </p>
+
+    <div class="bg-black/60 p-4 rounded-lg text-xs font-mono text-slate-300">
+        LinkedList&lt;Producto&gt; inventario = new LinkedList&lt;&gt;();<br><br>
+        
+        <span class="text-emerald-400">// Usando Comparable (Orden Natural por SKU)</span><br>
+        inventario.sort(<span class="text-rose-300">null</span>);<br><br>
+        
+        <span class="text-emerald-400">// Usando Comparator por Nombre</span><br>
+        inventario.sort(<span class="text-rose-300">new ComparadorPorNombre()</span>);<br><br>
+        
+        <span class="text-emerald-400">// Usando Comparator Combinado (Tipo + SKU)</span><br>
+        inventario.sort(<span class="text-rose-300">new ComparadorPorTipoYSKU()</span>);
+    </div>
+</div>

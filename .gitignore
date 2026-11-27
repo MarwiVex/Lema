@@ -1,0 +1,45 @@
+# dependencies
+node_modules
+.pnpm-store
+
+# Next.js build output
+.next
+out
+*.tsbuildinfo
+
+
+# environment variables
+.env
+.env*.local
+
+# SQLite database
+*.db
+*.db-journal
+
+# Prisma
+/src/generated/prisma
+
+# Logs & temp test files
+*.log
+compile_test*.txt
+ts_errors.txt
+test-*.js
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# WASM assets for texlyre-busytex (too large for Git, ~700MB)
+# Regenerate with: npx texlyre-busytex download-assets ./public/core
+public/core/busytex/
+
+# Scratch & temporary test files
+patch-dashboard.js
+scratch-test.mjs
+Discrete_mathematics.zip
+tectonic.tar.gz
+test_main.*
+test_output.pdf
+--help/
+siama-mock-dataset/
+

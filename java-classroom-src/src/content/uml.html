@@ -1,0 +1,229 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-purple-500/20 text-purple-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-diagram-project"></i></span>
+    Diagramas UML, Herencia y Editor Interactivo
+</h2>
+
+<p class="text-slate-300 mb-6 text-base leading-relaxed">
+    Los diagramas de clases <strong>UML (Unified Modeling Language)</strong> son una representación visual del diseño orientado a objetos de un sistema. Nos permiten planificar la estructura de clases, sus atributos, métodos y las relaciones entre ellas antes o durante la programación.
+</p>
+
+<!-- Explicación de la Herencia y UML -->
+<h3 class="text-2xl font-bold text-purple-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-sitemap text-purple-400"></i> Explicación de la Herencia y este Diagrama
+</h3>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="glass p-6 rounded-xl border-l-4 border-l-purple-500">
+        <h4 class="font-bold text-purple-400 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-layer-group"></i> Superclase (Clase Padre): <code>Electronico</code>
+        </h4>
+        <p class="text-sm text-slate-300 leading-relaxed mb-3">
+            Es la clase general que engloba los atributos y comportamientos comunes a todos los dispositivos electrónicos (<code>NS</code>, <code>SKU</code>, <code>Marca</code>, <code>Modelo</code>, <code>Precio</code> y sus respectivos Getters/Setters).
+        </p>
+        <div class="bg-purple-950/40 p-3 rounded-lg border border-purple-500/20 text-xs text-purple-200">
+            <i class="fa-solid fa-circle-info mr-1"></i> Evita la duplicación de código compartiendo estas propiedades con sus clases hijas.
+        </div>
+    </div>
+
+    <div class="glass p-6 rounded-xl border-l-4 border-l-blue-500">
+        <h4 class="font-bold text-blue-400 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-code-branch"></i> Subclases (Clases Hijas): <code>Television</code>, <code>Estereo</code>, <code>Consola</code>
+        </h4>
+        <p class="text-sm text-slate-300 leading-relaxed mb-3">
+            Heredan <strong>automáticamente</strong> todos los atributos y métodos de <code>Electronico</code> usando la palabra clave <code>extends</code> en Java, e introducen sus propios atributos específicos (ej. <code>Pulgadas</code> en <code>Television</code>, <code>Potencia</code> en <code>Estereo</code>, <code>Capacidad</code> en <code>Consola</code>).
+        </p>
+        <div class="bg-blue-950/40 p-3 rounded-lg border border-blue-500/20 text-xs text-blue-200">
+            <i class="fa-solid fa-arrow-up mr-1"></i> Sintaxis PlantUML: <code>Electronico &lt;|-- Television</code> representa la flecha de herencia (generalización).
+        </div>
+    </div>
+</div>
+
+<!-- Nomenclatura UML -->
+<div class="glass p-5 rounded-xl mb-10 border border-white/10">
+    <h4 class="font-bold text-slate-200 mb-3 flex items-center gap-2">
+        <i class="fa-solid fa-key text-amber-400"></i> Simbología de Visibilidad en UML
+    </h4>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono">
+        <div class="bg-black/40 p-3 rounded-lg border border-white/5">
+            <span class="text-rose-400 font-bold text-sm mr-2">-</span> <strong>Privado (private):</strong> Accesible solo dentro de la misma clase.
+        </div>
+        <div class="bg-black/40 p-3 rounded-lg border border-white/5">
+            <span class="text-emerald-400 font-bold text-sm mr-2">+</span> <strong>Público (public):</strong> Accesible desde cualquier lugar del programa.
+        </div>
+        <div class="bg-black/40 p-3 rounded-lg border border-white/5">
+            <span class="text-amber-400 font-bold text-sm mr-2">#</span> <strong>Protegido (protected):</strong> Accesible en el paquete y por subclases.
+        </div>
+    </div>
+</div>
+
+<!-- Compilador / Editor Interactivo de Diagramas UML -->
+<h3 class="text-2xl font-bold text-purple-300 mb-4 mt-12 flex items-center gap-2">
+    <i class="fa-solid fa-pen-to-square text-emerald-400"></i> Compilador y Editor UML en Vivo
+</h3>
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Edita la sintaxis PlantUML en el panel izquierdo. El diagrama se renderizará automáticamente en tiempo real en el visualizador interactivo.
+</p>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Editor PlantUML -->
+    <div class="flex flex-col glass rounded-xl overflow-hidden border border-white/10 shadow-2xl">
+        <div class="bg-[#0f172a] px-4 py-3 border-b border-white/10 flex justify-between items-center">
+            <span class="text-xs font-mono font-bold text-purple-400 flex items-center gap-2">
+                <i class="fa-solid fa-code"></i> Código PlantUML
+            </span>
+            <div class="flex items-center gap-2">
+                <button onclick="resetUmlCode()" class="text-xs bg-white/5 hover:bg-white/10 text-slate-300 px-2.5 py-1 rounded transition-colors" title="Restaurar código original">
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Reset
+                </button>
+                <button onclick="copyUmlCode()" class="text-xs bg-purple-600/80 hover:bg-purple-500 text-white px-2.5 py-1 rounded transition-colors font-semibold">
+                    <i class="fa-regular fa-copy mr-1"></i> Copiar
+                </button>
+            </div>
+        </div>
+        <textarea id="uml-editor" class="w-full h-96 p-4 bg-[#090d16] text-purple-200 font-mono text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-purple-500 resize-none custom-scrollbar shadow-inner">@startuml
+
+class Electronico {
+  - NS : String
+  - SKU : String
+  - Marca : String
+  - Modelo : String
+  - Precio : Float
+  
+  + setNS(String): void
+  + getNS(): String
+  + setMarca(String): void
+  + getMarca(): String
+  + setModelo(String): void
+  + getModelo(): String
+  + setSKU(String): void
+  + getSKU(): String
+  + setPrecio(Float): void
+  + getPrecio(): Float
+}
+
+class Television {
+  - Pulgadas : Float
+  - Tipo : String
+  
+  + setPulgadas(Float): void
+  + getPulgadas(): Float
+  + setTipo(String): void
+  + getTipo(): String
+}
+
+class Estereo {
+  - Potencia : Integer
+  
+  + setPotencia(Integer): void
+  + getPotencia(): Integer
+}
+
+class Consola {
+  - Tipo : String
+  - Capacidad : Integer
+  
+  + setTipo(String): void
+  + getTipo(): String
+  + setCapacidad(Integer): void
+  + getCapacidad(): Integer
+}
+
+Electronico <|-- Television
+Electronico <|-- Estereo
+Electronico <|-- Consola
+
+@enduml</textarea>
+    </div>
+
+    <!-- Visualizador de Diagrama -->
+    <div class="flex flex-col glass rounded-xl overflow-hidden border border-white/10 shadow-2xl">
+        <div class="bg-[#0f172a] px-4 py-3 border-b border-white/10 flex justify-between items-center">
+            <span class="text-xs font-mono font-bold text-emerald-400 flex items-center gap-2">
+                <i class="fa-solid fa-eye"></i> Renderizado UML (Kroki API)
+            </span>
+            <span id="uml-status" class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-mono">Actualizado</span>
+        </div>
+        <div class="w-full h-96 bg-[#0d1322] p-4 flex items-center justify-center overflow-auto custom-scrollbar relative">
+            <img id="uml-diagram-img" class="max-w-none transition-opacity duration-300" alt="Diagrama UML Renderizado" />
+            <div id="uml-loading" class="absolute inset-0 bg-[#0d1322]/80 backdrop-blur-xs flex items-center justify-center hidden">
+                <i class="fa-solid fa-circle-notch fa-spin text-purple-400 text-3xl"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Código Java Resultante Generado -->
+<h3 class="text-2xl font-bold text-blue-300 mb-4 mt-12 flex items-center gap-2">
+    <i class="fa-brands fa-java text-blue-400"></i> Código Java Equivalente de este Diagrama
+</h3>
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Así se traduce la jerarquía del diagrama UML a código Java real compilable:
+</p>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-purple-500/20 text-purple-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-purple-300 text-sm"></i> JerarquiaElectronicos.java
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">// Superclase
+class Electronico {
+    private String NS;
+    private String SKU;
+    private String Marca;
+    private String Modelo;
+    private float Precio;
+
+    public void setNS(String NS) { this.NS = NS; }
+    public String getNS() { return this.NS; }
+    public void setMarca(String Marca) { this.Marca = Marca; }
+    public String getMarca() { return this.Marca; }
+    public void setModelo(String Modelo) { this.Modelo = Modelo; }
+    public String getModelo() { return this.Modelo; }
+    public void setSKU(String SKU) { this.SKU = SKU; }
+    public String getSKU() { return this.SKU; }
+    public void setPrecio(float Precio) { this.Precio = Precio; }
+    public float getPrecio() { return this.Precio; }
+}
+
+// Subclase 1: Television (Hereda de Electronico)
+class Television extends Electronico {
+    private float Pulgadas;
+    private String Tipo;
+
+    public void setPulgadas(float Pulgadas) { this.Pulgadas = Pulgadas; }
+    public float getPulgadas() { return this.Pulgadas; }
+    public void setTipo(String Tipo) { this.Tipo = Tipo; }
+    public String getTipo() { return this.Tipo; }
+}
+
+// Subclase 2: Estereo (Hereda de Electronico)
+class Estereo extends Electronico {
+    private int Potencia;
+
+    public void setPotencia(int Potencia) { this.Potencia = Potencia; }
+    public int getPotencia() { return this.Potencia; }
+}
+
+// Subclase 3: Consola (Hereda de Electronico)
+class Consola extends Electronico {
+    private String Tipo;
+    private int Capacidad;
+
+    public void setTipo(String Tipo) { this.Tipo = Tipo; }
+    public String getTipo() { return this.Tipo; }
+    public void setCapacidad(int Capacidad) { this.Capacidad = Capacidad; }
+    public int getCapacidad() { return this.Capacidad; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Television tv = new Television();
+        tv.setMarca("Samsung");
+        tv.setModelo("Neo QLED");
+        tv.setPulgadas(65.0f);
+        tv.setPrecio(1200.50f);
+
+        System.out.println("TV Marca: " + tv.getMarca() + " | Modelo: " + tv.getModelo() + " | Pulgadas: " + tv.getPulgadas());
+    }
+}</code></pre>
+</div>

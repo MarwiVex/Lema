@@ -1,0 +1,397 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-blue-500/20 text-blue-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-layer-group"></i></span>
+    POO Avanzado: Herencia, Polimorfismo, Casteo y Estructuras en Memoria
+</h2>
+
+<p class="text-slate-300 mb-8 text-base leading-relaxed">
+    Esta guía profundiza en los pilares fundamentales de la Programación Orientada a Objetos en Java. Analizaremos en detalle cómo funciona la herencia mediante <code>extends</code>, el mecanismo interno del polimorfismo y el casteo (<em>Upcasting</em> y <em>Downcasting</em>), el peligro del ocultamiento de variables (<em>Shadowing</em>), y la diferencia en memoria entre <code>LinkedList</code> y arreglos tradicionales.
+</p>
+
+<!-- 1. LA PALABRA CLAVE EXTENDS Y LA HERENCIA -->
+<h3 class="text-2xl font-bold text-blue-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-diagram-project text-blue-400"></i> 1. Herencia en Java: La palabra clave <code>extends</code>
+</h3>
+
+<div class="glass p-6 rounded-xl border-l-4 border-l-blue-500 mb-6">
+    <h4 class="font-bold text-lg text-blue-300 mb-2">¿Qué hace exactamente <code>extends</code>?</h4>
+    <p class="text-sm text-slate-300 leading-relaxed mb-4">
+        La palabra clave <code>extends</code> establece una relación de <strong>Herencia</strong> entre dos clases, creando una jerarquía de tipo <strong>"Es Un" (Is-A)</strong>. 
+        Por ejemplo: <code>public class Televisor extends Electronico</code> significa que un <code>Televisor</code> <strong>es un</strong> <code>Electronico</code>.
+    </p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+        <div class="bg-black/40 p-4 rounded-lg border border-white/10">
+            <span class="text-blue-400 font-bold block mb-2">// Clase Padre (Superclase)</span>
+            <span class="text-slate-300">public class Electronico {</span><br>
+            <span class="text-slate-400 pl-4">protected String marca;</span><br>
+            <span class="text-slate-400 pl-4">protected Float precio;</span><br>
+            <span class="text-slate-300">}</span>
+        </div>
+        <div class="bg-black/40 p-4 rounded-lg border border-emerald-500/30">
+            <span class="text-emerald-400 font-bold block mb-2">// Clase Hija (Subclase)</span>
+            <span class="text-slate-300">public class Televisor extends Electronico {</span><br>
+            <span class="text-slate-400 pl-4">// Hereda marca y precio automáticamente</span><br>
+            <span class="text-emerald-400 pl-4">private Float pulgadas; // Atributo exclusivo</span><br>
+            <span class="text-slate-300">}</span>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <div class="glass p-5 rounded-xl border border-white/10">
+        <h5 class="font-bold text-amber-400 mb-2 text-sm"><i class="fa-solid fa-memory"></i> Asignación en Memoria</h5>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Al hacer <code>new Televisor()</code>, Java reserva un bloque de memoria en el <strong>Heap</strong> que contiene los campos del padre (<code>ns</code>, <code>marca</code>, <code>modelo</code>, <code>precio</code>) <strong>MÁS</strong> los campos de la clase hija (<code>pulgadas</code>, <code>tipo</code>).
+        </p>
+    </div>
+    <div class="glass p-5 rounded-xl border border-white/10">
+        <h5 class="font-bold text-cyan-400 mb-2 text-sm"><i class="fa-solid fa-shield-halved"></i> Modificador <code>protected</code></h5>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Permite que los atributos de la superclase sean accesibles directamente por las clases hijas (y clases dentro del mismo paquete), pero manteniéndose protegidos contra accesos no autorizados desde paquetes externos.
+        </p>
+    </div>
+    <div class="glass p-5 rounded-xl border border-white/10">
+        <h5 class="font-bold text-purple-400 mb-2 text-sm"><i class="fa-solid fa-ban"></i> Herencia Única</h5>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            En Java <strong>NO existe herencia múltiple de clases</strong>. Una clase solo puede extender de <code>una</code> superclase. Esto previene la ambigüedad del "Problema del Diamante".
+        </p>
+    </div>
+</div>
+
+<!-- 2. POLIMORFISMO Y CASTEO -->
+<h3 class="text-2xl font-bold text-purple-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-shuffle text-purple-400"></i> 2. Polimorfismo, Casteo (Upcasting / Downcasting) e <code>instanceof</code>
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    El <strong>Polimorfismo</strong> permite tratar objetos de distintas subclases (<code>Televisor</code>, <code>Videojuego</code>) a través de un tipo genérico común (<code>Electronico</code>).
+</p>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <!-- Upcasting -->
+    <div class="glass p-6 rounded-xl border-l-4 border-l-emerald-500">
+        <h4 class="font-bold text-emerald-400 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-arrow-up text-emerald-400"></i> Upcasting (Conversión Implícita)
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed mb-3">
+            Es la conversión de una subclase a su superclase. Es <strong>100% segura y automática</strong>.
+        </p>
+        <div class="bg-black/50 p-3 rounded font-mono text-xs text-slate-300">
+            Electronico e1 = new Televisor(); <span class="text-slate-500">// Válido</span><br>
+            LinkedList&lt;Electronico&gt; lista = new LinkedList&lt;&gt;();<br>
+            lista.add(new Videojuego()); <span class="text-slate-500">// Upcasting automático</span>
+        </div>
+        <p class="text-xs text-amber-300/90 mt-2">
+            <i class="fa-solid fa-circle-info mr-1"></i> <strong>Limitación:</strong> A través de la variable <code>e1</code> (tipo Electronico), solo puedes invocar métodos definidos en <code>Electronico</code>. No puedes llamar a <code>setPulgadas()</code> directamente.
+        </p>
+    </div>
+
+    <!-- Downcasting -->
+    <div class="glass p-6 rounded-xl border-l-4 border-l-rose-500">
+        <h4 class="font-bold text-rose-400 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-arrow-down text-rose-400"></i> Downcasting (Conversión Explícita)
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed mb-3">
+            Es recuperar el tipo específico de la clase hija a partir de una referencia del padre. Requiere un casteo manual <code>(TipoHijo)</code>.
+        </p>
+        <div class="bg-black/50 p-3 rounded font-mono text-xs text-slate-300">
+            Electronico e1 = lista.get(0);<br>
+            <span class="text-rose-300 font-bold">Televisor t = (Televisor) e1;</span> <span class="text-slate-500">// Casteo explícito</span><br>
+            t.setPulgadas(55f); <span class="text-slate-500">// ¡Ahora sí es accesible!</span>
+        </div>
+        <p class="text-xs text-rose-300 mt-2">
+            <i class="fa-solid fa-triangle-exclamation mr-1"></i> <strong>Peligro:</strong> Si <code>e1</code> en realidad fuera un <code>Videojuego</code>, la JVM lanzará un error fatal: <code>ClassCastException</code>.
+        </p>
+    </div>
+</div>
+
+<!-- Operador instanceof -->
+<div class="glass p-6 rounded-xl border border-purple-500/30 mb-8">
+    <h4 class="font-bold text-purple-300 mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-shield-cat text-purple-400"></i> Validación Segura con <code>instanceof</code>
+    </h4>
+    <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+        Antes de realizar un <em>Downcasting</em>, se debe verificar si el objeto en memoria pertenece a la clase requerida usando el operador <code>instanceof</code>.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <span class="text-xs font-bold text-slate-400 block mb-1">Forma Tradicional:</span>
+            <div class="code-wrapper relative pt-2">
+                <pre class="rounded-lg bg-black/60 p-3 text-xs"><code class="language-java">if (electronico instanceof Televisor) {
+    Televisor tele = (Televisor) electronico;
+    tele.setPulgadas(55f);
+}</code></pre>
+            </div>
+        </div>
+        <div>
+            <span class="text-xs font-bold text-emerald-400 block mb-1">Forma Moderna (Pattern Matching - Java 16+):</span>
+            <div class="code-wrapper relative pt-2">
+                <pre class="rounded-lg bg-black/60 p-3 text-xs"><code class="language-java">// Castea y asigna la variable en un solo paso
+if (electronico instanceof Televisor tele) {
+    tele.setPulgadas(55f);
+}</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. OCULTAMIENTO DE VARIABLES (SHADOWING) -->
+<h3 class="text-2xl font-bold text-amber-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-mask text-amber-400"></i> 3. Ocultamiento de Variables (Shadowing) vs Sobrescritura
+</h3>
+
+<div class="glass p-6 rounded-xl border-l-4 border-l-amber-500 mb-8">
+    <h4 class="font-bold text-amber-400 mb-2 text-base">El Error de Redeclarar Atributos en las Clases Hijas</h4>
+    <p class="text-sm text-slate-300 leading-relaxed mb-4">
+        Analicemos el siguiente error detectado en la clase <code>Videojuego</code> de tu código original:
+    </p>
+    <div class="bg-black/50 p-4 rounded-lg font-mono text-xs text-slate-300 mb-4 border border-rose-500/30">
+        <span class="text-slate-400">public class Electronico { protected Float Precio; }</span><br><br>
+        <span class="text-slate-400">public class Videojuego extends Electronico {</span><br>
+        <span class="text-rose-400 font-bold pl-4">private Float Precio; // &#10007; ¡ERROR DE DISEÑO! (Shadowing)</span><br>
+        <span class="text-slate-400 pl-4">private Integer Capacidad;</span><br>
+        <span class="text-slate-400">}</span>
+    </div>
+    <div class="space-y-2 text-xs text-slate-300">
+        <p class="flex items-start gap-2">
+            <span class="text-amber-400 font-bold">•</span>
+            <span><strong>¿Qué sucede físicamente?</strong> Java crea <strong>dos variables distintas en memoria</strong> para el mismo objeto: <code>super.Precio</code> (heredada del padre) y <code>this.Precio</code> (declarada en el hijo).</span>
+        </p>
+        <p class="flex items-start gap-2">
+            <span class="text-amber-400 font-bold">•</span>
+            <span><strong>¿Por qué rompe el programa?</strong> Si ejecutas <code>electronico.setPrecio(100f)</code> desde una referencia de tipo <code>Electronico</code>, se modificará el <code>Precio</code> del padre. Pero los métodos propios de <code>Videojuego</code> accederán al <code>Precio</code> del hijo (que seguirá valiendo <code>null</code>).</span>
+        </p>
+        <p class="flex items-start gap-2">
+            <span class="text-emerald-400 font-bold">•</span>
+            <span><strong>Regla de Oro:</strong> NUNCA vuelvas a declarar en una clase hija un atributo que ya heredaste del padre. Simplemente usa los campos del padre.</span>
+        </p>
+    </div>
+</div>
+
+<!-- 4. LINKEDLIST VS ARREGLOS EN MEMORIA -->
+<h3 class="text-2xl font-bold text-emerald-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-memory text-emerald-400"></i> 4. LinkedList vs Arreglos en Memoria y Rendimiento
+</h3>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <div class="glass p-6 rounded-xl border-l-4 border-l-emerald-500">
+        <h4 class="font-bold text-emerald-400 mb-2">Arreglos Tradicionales / ArrayList</h4>
+        <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+            <li>• Memoria reservada en un <strong>bloque contiguo</strong>.</li>
+            <li>• <strong>Acceso por índice:</strong> Complejidad <strong>O(1)</strong> (inmediato por fórmula matemática de dirección offset).</li>
+            <li>• <strong>Inserción / Eliminación:</strong> Costosa <strong>O(N)</strong> porque requiere desplazar los demás elementos.</li>
+        </ul>
+    </div>
+
+    <div class="glass p-6 rounded-xl border-l-4 border-l-rose-500">
+        <h4 class="font-bold text-rose-400 mb-2">LinkedList (Lista Enlazada Doble)</h4>
+        <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+            <li>• Elementos (Nodos) <strong>dispersos en la memoria Heap</strong> enlazados con punteros <code>next</code> y <code>prev</code>.</li>
+            <li>• <strong>Acceso por índice:</strong> Complejidad <strong>O(N)</strong>. Para leer la posición 5, Java debe iterar desde el inicio (o final) pasando por los nodos 0 &rarr; 1 &rarr; 2 &rarr; 3 &rarr; 4 &rarr; 5.</li>
+            <li>• <strong>Inserción / Eliminación en los extremos:</strong> Muy veloz <strong>O(1)</strong> (solo se cambian los enlaces/punteros).</li>
+        </ul>
+    </div>
+</div>
+
+<div class="glass p-5 rounded-xl border border-amber-500/30 mb-8">
+    <h4 class="font-bold text-amber-300 mb-2 text-sm flex items-center gap-2">
+        <i class="fa-solid fa-bolt"></i> Antipatrón de Rendimiento Frecuente
+    </h4>
+    <p class="text-xs text-slate-300 mb-3 leading-relaxed">
+        En tu código inicial hacías esto:
+    </p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+        <div class="bg-black/50 p-3 rounded border border-rose-500/30">
+            <span class="text-rose-400 font-bold block mb-1">Ineficiente (Múltiples recorridos O(N)):</span>
+            electronicos.get(0).setMarca("Samsung");<br>
+            electronicos.get(0).setModelo("QLED");<br>
+            electronicos.get(0).setNS("SN123");
+        </div>
+        <div class="bg-black/50 p-3 rounded border border-emerald-500/30">
+            <span class="text-emerald-400 font-bold block mb-1">Eficiente (Extracción única O(1)):</span>
+            Electronico e = electronicos.get(0);<br>
+            e.setMarca("Samsung");<br>
+            e.setModelo("QLED");<br>
+            e.setNS("SN123");
+        </div>
+    </div>
+</div>
+
+<!-- 5. ERRORES SINTÁCTICOS Y CONVENCIONES -->
+<h3 class="text-2xl font-bold text-cyan-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-bug text-cyan-400"></i> 5. Errores Sintácticos Frecuentes en Java
+</h3>
+
+<div class="glass p-6 rounded-xl border border-white/10 mb-10">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+        <div>
+            <h5 class="font-bold text-amber-300 mb-2">1. Literal Float en Java</h5>
+            <p class="text-slate-300 leading-relaxed">
+                Por defecto, números decimales como <code>32323.55</code> son interpretados por Java como <code>double</code> (64 bits). Para asignarlos a un <code>Float</code> (32 bits), es <strong>obligatorio</strong> incluir el sufijo <code>f</code>:
+                <br><span class="font-mono text-emerald-400">float precio = 32323.55f;</span>
+            </p>
+        </div>
+        <div>
+            <h5 class="font-bold text-amber-300 mb-2">2. Especificadores de String.format</h5>
+            <p class="text-slate-300 leading-relaxed">
+                En tu código tenías <code>String.format("%NS %s...")</code>. El símbolo <code>%</code> indica el inicio de un especificador de formato. Escribir <code>%NS</code> genera un error. Debe ser <code>NS: %s</code>.
+            </p>
+        </div>
+        <div>
+            <h5 class="font-bold text-amber-300 mb-2">3. Convenciones Naming (camelCase)</h5>
+            <p class="text-slate-300 leading-relaxed">
+                En Java las variables y métodos usan <code>camelCase</code> (ej. <code>marca</code>, <code>setPrecio()</code>). Las clases usan <code>PascalCase</code> (ej. <code>Televisor</code>, <code>Electronico</code>).
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- 6. CÓDIGO COMPLETO Y CORREGIDO -->
+<h3 class="text-2xl font-bold text-emerald-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-code text-emerald-400"></i> 6. Código Completo Corregido y Documentado
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    A continuación se presenta el código completo con la estructura modular corregida, aplicación de buenas prácticas, resolviendo el problema de <em>Shadowing</em> y usando <em>Downcasting</em> seguro con <code>instanceof</code>.
+</p>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-emerald-300 text-sm"></i> EjercicioCompleto.java
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0 max-h-[600px] overflow-y-auto custom-scrollbar"><code class="language-java">import java.util.LinkedList;
+
+// ==========================================
+// 1. SUPERCLASE BASE (Electronico)
+// ==========================================
+class Electronico {
+    // Atributos protected: Accesibles por la misma clase, paquete y clases hijas
+    protected String ns;
+    protected String marca;
+    protected String modelo;
+    protected Float precio;
+
+    // Getters y Setters respetando convención camelCase
+    public String getNs() { return ns; }
+    public void setNs(String ns) { this.ns = ns; }
+
+    public String getMarca() { return marca; }
+    public void setMarca(String marca) { this.marca = marca; }
+
+    public String getModelo() { return modelo; }
+    public void setModelo(String modelo) { this.modelo = modelo; }
+
+    public Float getPrecio() { return precio; }
+    public void setPrecio(Float precio) { this.precio = precio; }
+
+    // Sobrescritura de toString() heredado de java.lang.Object
+    @Override
+    public String toString() {
+        return String.format("NS: %s | Marca: %s | Modelo: %s | Precio: $%.2f", 
+                              ns, marca, modelo, precio != null ? precio : 0.0f);
+    }
+}
+
+// ==========================================
+// 2. SUBCLASE TELEVISOR (Hereda con extends)
+// ==========================================
+class Televisor extends Electronico {
+    // Atributos EXCLUSIVOS de Televisor
+    private Float pulgadas;
+    private String tipo;
+
+    public Float getPulgadas() { return pulgadas; }
+    public void setPulgadas(Float pulgadas) { this.pulgadas = pulgadas; }
+
+    public String getTipo() { return tipo; }
+    public void setTipo(String tipo) { this.tipo = tipo; }
+
+    // Reutilizamos la lógica del padre mediante super.toString()
+    @Override
+    public String toString() {
+        return String.format("%s | Pulgadas: %.1f\" | Tipo: %s", 
+                              super.toString(), 
+                              pulgadas != null ? pulgadas : 0.0f, 
+                              tipo != null ? tipo : "N/A");
+    }
+}
+
+// ==========================================
+// 3. SUBCLASE VIDEOJUEGO (Hereda con extends)
+// ==========================================
+class Videojuego extends Electronico {
+    // Atributos EXCLUSIVOS de Videojuego
+    private Integer capacidad;
+    private String tipo; 
+    // NOTA IMPORTANTE: Se eliminó 'private Float precio;' para EVITAR SHADOWING (ocultamiento de variables)
+
+    public Integer getCapacidad() { return capacidad; }
+    public void setCapacidad(Integer capacidad) { this.capacidad = capacidad; }
+
+    public String getTipo() { return tipo; }
+    public void setTipo(String tipo) { this.tipo = tipo; }
+
+    @Override
+    public String toString() {
+        return String.format("%s | Capacidad: %d GB | Tipo: %s", 
+                              super.toString(), 
+                              capacidad != null ? capacidad : 0, 
+                              tipo != null ? tipo : "N/A");
+    }
+}
+
+// ==========================================
+// 4. CLASE PRINCIPAL (Main)
+// ==========================================
+public class Main {
+    public static void main(String[] args) {
+        // Creación de lista polimórfica (guarda referencias de tipo Electronico)
+        LinkedList<Electronico> electronicos = new LinkedList<>();
+
+        // Upcasting implícito: Televisor y Videojuego son añadidos como Electronico
+        electronicos.add(new Televisor());
+        electronicos.add(new Videojuego());
+
+        // Optimización: Extraemos la referencia del primer elemento para evitar múltiples .get(0) O(N)
+        Electronico primerElem = electronicos.get(0);
+        primerElem.setMarca("Samsung");
+        primerElem.setModelo("QLED 4K");
+        primerElem.setNs("SN-998877");
+        primerElem.setPrecio(32323.55f); // Sufijo 'f' obligatorio para Float
+
+        // DOWNCASTING SEGURO usando instanceof (Pattern Matching de Java 16+)
+        if (primerElem instanceof Televisor tele) {
+            tele.setPulgadas(55f);
+            tele.setTipo("Smart TV");
+        }
+
+        // Configuración del segundo elemento (Videojuego)
+        Electronico segundoElem = electronicos.get(1);
+        segundoElem.setMarca("Sony");
+        segundoElem.setModelo("PlayStation 5");
+        segundoElem.setNs("PS5-100200");
+        segundoElem.setPrecio(14999.99f);
+
+        if (segundoElem instanceof Videojuego juego) {
+            juego.setCapacidad(1024); // 1 TB
+            juego.setTipo("Consola de Sobremesa");
+        }
+
+        System.out.println("Total de elementos iniciales: " + electronicos.size());
+        System.out.println("\n--- LISTA DE DISPOSITIVOS ---");
+        for (Electronico e : electronicos) {
+            System.out.println(e); // Invoca automáticamente el toString() polimórfico
+        }
+
+        // Eliminación del primer elemento
+        electronicos.remove();
+
+        System.out.println("\nTotal tras remover el primero: " + electronicos.size());
+        System.out.println("--- ELEMENTOS RESTANTES ---");
+        for (Electronico e : electronicos) {
+            System.out.println(e);
+        }
+    }
+}</code></pre>
+</div>

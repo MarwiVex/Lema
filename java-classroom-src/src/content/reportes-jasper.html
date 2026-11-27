@@ -1,0 +1,251 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-rose-500/20 text-rose-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-file-pdf"></i></span>
+    20. Generación de Reportes y PDF con JasperReports
+</h2>
+
+<p class="text-slate-300 mb-8 text-base leading-relaxed">
+    En sistemas empresariales y proyectos escolares completos, mostrar datos en un <code>TableView</code> no es suficiente: el usuario necesita imprimir facturas, inventarios o exportar reportes en <strong>PDF</strong>. Para ello, el ecosistema Java utiliza <strong>JasperReports Library</strong> junto con su diseñador visual <strong>Jaspersoft Studio</strong>, tal como se implementa en el paquete <code>EjemploJasper</code> del proyecto <strong>BaseDatos</strong>.
+</p>
+
+<!-- 1. FLUJO DE TRABAJO DE JASPERREPORTS -->
+<h3 class="text-2xl font-bold text-rose-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-diagram-next text-rose-400"></i> 1. El Flujo de Trabajo en 4 Pasos (De <code>.jrxml</code> al Visor / PDF)
+</h3>
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+    <div class="glass p-4 rounded-xl border-t-4 border-t-amber-500">
+        <div class="text-xs font-mono text-amber-400 mb-1">PASO 1: Diseño XML</div>
+        <h4 class="font-bold text-white text-sm mb-1"><code>ReporteCafe.jrxml</code></h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Se diseña visualmente arrastrando textos, líneas y campos en <strong>Jaspersoft Studio</strong> (similar a Scene Builder pero para documentos).
+        </p>
+    </div>
+
+    <div class="glass p-4 rounded-xl border-t-4 border-t-cyan-500">
+        <div class="text-xs font-mono text-cyan-400 mb-1">PASO 2: Compilación</div>
+        <h4 class="font-bold text-white text-sm mb-1"><code>ReporteCafe.jasper</code></h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            En Jaspersoft Studio pulsas el icono <em>Compile Report</em> (martillo) para generar el archivo binario <code>.jasper</code> que colocas en la raíz de tu proyecto Java.
+        </p>
+    </div>
+
+    <div class="glass p-4 rounded-xl border-t-4 border-t-purple-500">
+        <div class="text-xs font-mono text-purple-400 mb-1">PASO 3: Llenado (Fill)</div>
+        <h4 class="font-bold text-white text-sm mb-1"><code>JasperFillManager</code></h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Java toma el archivo <code>.jasper</code> y le inyecta tu <code>LinkedList&lt;Cafe&gt;</code> envuelta en un <code>JRBeanCollectionDataSource</code>, produciendo un <code>JasperPrint</code>.
+        </p>
+    </div>
+
+    <div class="glass p-4 rounded-xl border-t-4 border-t-emerald-500">
+        <div class="text-xs font-mono text-emerald-400 mb-1">PASO 4: Salida</div>
+        <h4 class="font-bold text-white text-sm mb-1"><code>JasperViewer</code> / PDF</h4>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Se abre la ventana interactiva <code>JasperViewer</code> (desde donde el usuario puede imprimir o guardar en PDF, Excel, DOCX) o se exporta directo a PDF.
+        </p>
+    </div>
+</div>
+
+<!-- 2. DEPENDENCIAS EN POM.XML Y MODULE-INFO -->
+<h3 class="text-2xl font-bold text-amber-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-gears text-amber-400"></i> 2. Configuración en <code>pom.xml</code> y <code>module-info.java</code>
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    En la versión <strong>7.0.8</strong> de JasperReports utilizada en el proyecto, se agregan los artefactos <code>jasperreports</code> y <code>jasperreports-pdf</code>. Además, como <code>JasperViewer</code> está construido sobre Swing/AWT y lee los POJOs por reflexión, el archivo <code>module-info.java</code> requiere permisos específicos:
+</p>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <div class="code-wrapper relative pt-6">
+        <div class="absolute top-0 left-0 bg-amber-500/20 text-amber-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-solid fa-file-code text-amber-300 text-sm"></i> pom.xml (Dependencias JasperReports 7.0.8)
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-xml">&lt;!-- JasperReports 7.0.8 --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;net.sf.jasperreports&lt;/groupId&gt;
+    &lt;artifactId&gt;jasperreports&lt;/artifactId&gt;
+    &lt;version&gt;7.0.8&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;net.sf.jasperreports&lt;/groupId&gt;
+    &lt;artifactId&gt;jasperreports-pdf&lt;/artifactId&gt;
+    &lt;version&gt;7.0.8&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+    </div>
+
+    <div class="code-wrapper relative pt-6">
+        <div class="absolute top-0 left-0 bg-purple-500/20 text-purple-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+            <i class="fa-brands fa-java text-purple-300 text-sm"></i> module-info.java (Requerimientos de Jasper)
+        </div>
+        <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+        <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">module com.example.basedatos {
+    requires javafx.controls;
+    requires javafx.fxml;
+    requires java.sql;
+    requires java.desktop; // Requerido por JasperViewer (Swing)
+    requires net.sf.jasperreports.core; // Motor de JasperReports
+
+    // OBLIGATORIO: abrir el paquete POJO para que JRBeanCollectionDataSource
+    // pueda invocar getIdcafe(), getProductor() y getCantidad() por reflexión
+    opens com.example.basedatos.POJO;
+    exports com.example.basedatos.POJO;
+    exports EjemploJasper;
+}</code></pre>
+    </div>
+</div>
+
+<!-- 3. ANATOMÍA DEL ARCHIVO JRXML -->
+<h3 class="text-2xl font-bold text-cyan-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-file-lines text-cyan-400"></i> 3. Anatomía de la Plantilla <code>ReporteCafe.jrxml</code>
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Un reporte en Jaspersoft Studio se divide en <strong>Bandas (Bands)</strong> horizontales y utiliza dos tipos de expresiones dinámicas:
+</p>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <div class="glass p-5 rounded-xl border border-cyan-500/30">
+        <h4 class="font-bold text-cyan-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-sliders"></i> Parámetros: <code>$P{nombre}</code> y Campos: <code>$F{atributo}</code>
+        </h4>
+        <ul class="text-xs text-slate-300 space-y-2 list-disc list-inside leading-relaxed">
+            <li><strong>Parámetros (<code>&lt;parameter name="anio"/&gt;</code> &rarr; <code>$P{anio}</code>):</strong> Valores únicos para todo el reporte (ej. título, fecha, nombre del usuario que imprimió).</li>
+            <li><strong>Campos (<code>&lt;field name="idcafe"/&gt;</code> &rarr; <code>$F{idcafe}</code>):</strong> Deben llamarse <strong>exactamente igual que la propiedad JavaBean</strong> de tu clase <code>Cafe.java</code> (como el getter es <code>getIdcafe()</code>, el field debe llamarse <code>idcafe</code>).</li>
+        </ul>
+    </div>
+
+    <div class="glass p-5 rounded-xl border border-emerald-500/30">
+        <h4 class="font-bold text-emerald-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-bars-staggered"></i> Bandas Principales del Documento
+        </h4>
+        <ul class="text-xs text-slate-300 space-y-2 list-disc list-inside leading-relaxed">
+            <li><strong><code>&lt;title&gt;</code>:</strong> Aparece una sola vez al principio del reporte (ej. <code>"Cafe reportes " + $P{anio}</code>).</li>
+            <li><strong><code>&lt;columnHeader&gt;</code>:</strong> Cabecera de la tabla con textos estáticos (<code>ID Café</code>, <code>Productor</code>, <code>Cantidad</code>).</li>
+            <li><strong><code>&lt;detail&gt;</code>:</strong> ¡Se repite automáticamente <strong>una vez por cada objeto <code>Cafe</code></strong> de tu <code>LinkedList</code>!</li>
+        </ul>
+    </div>
+</div>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-cyan-500/20 text-cyan-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-solid fa-code text-cyan-300 text-sm"></i> ReporteCafe.jrxml (Plantilla real del proyecto BaseDatos)
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-xml">&lt;!-- Created with Jaspersoft Studio version 7.0.8.final --&gt;
+&lt;jasperReport name="ReporteCafe" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20"&gt;
+    &lt;!-- 1. Parámetro global con valor por defecto "2026" --&gt;
+    &lt;parameter name="anio" class="java.lang.String"&gt;
+        &lt;defaultValueExpression&gt;&lt;![CDATA["2026"]]&gt;&lt;/defaultValueExpression&gt;
+    &lt;/parameter&gt;
+
+    &lt;!-- 2. Campos enlazados a los getters de Cafe.java (getIdcafe, getProductor, getCantidad) --&gt;
+    &lt;field name="idcafe" class="java.lang.Integer"/&gt;
+    &lt;field name="productor" class="java.lang.String"/&gt;
+    &lt;field name="cantidad" class="java.lang.Float"/&gt;
+
+    &lt;!-- 3. Banda de Título --&gt;
+    &lt;title height="50"&gt;
+        &lt;element kind="textField" x="0" y="10" width="555" height="30" fontSize="18.0" bold="true" hTextAlign="Center" vTextAlign="Middle"&gt;
+            &lt;expression&gt;&lt;![CDATA["Cafe reportes  " + $P{anio}]]&gt;&lt;/expression&gt;
+        &lt;/element&gt;
+    &lt;/title&gt;
+
+    &lt;!-- 4. Banda de Encabezados de Columna --&gt;
+    &lt;columnHeader height="25"&gt;
+        &lt;element kind="staticText" x="0" y="0" width="100" height="25" bold="true" hTextAlign="Center"&gt;
+            &lt;text&gt;&lt;![CDATA[ID Café]]&gt;&lt;/text&gt;
+        &lt;/element&gt;
+        &lt;element kind="staticText" x="100" y="0" width="300" height="25" bold="true" hTextAlign="Left"&gt;
+            &lt;text&gt;&lt;![CDATA[Productor]]&gt;&lt;/text&gt;
+        &lt;/element&gt;
+        &lt;element kind="staticText" x="400" y="0" width="155" height="25" bold="true" hTextAlign="Right"&gt;
+            &lt;text&gt;&lt;![CDATA[Cantidad]]&gt;&lt;/text&gt;
+        &lt;/element&gt;
+    &lt;/columnHeader&gt;
+
+    &lt;!-- 5. Banda de Detalle (Se repite por cada elemento de la LinkedList) --&gt;
+    &lt;detail&gt;
+        &lt;band height="20"&gt;
+            &lt;element kind="textField" x="0" y="0" width="100" height="20" hTextAlign="Center"&gt;
+                &lt;expression&gt;&lt;![CDATA[$F{idcafe}]]&gt;&lt;/expression&gt;
+            &lt;/element&gt;
+            &lt;element kind="textField" x="100" y="0" width="300" height="20" hTextAlign="Left"&gt;
+                &lt;expression&gt;&lt;![CDATA[$F{productor}]]&gt;&lt;/expression&gt;
+            &lt;/element&gt;
+            &lt;element kind="textField" x="400" y="0" width="155" height="20" pattern="#,##0.00" hTextAlign="Right"&gt;
+                &lt;expression&gt;&lt;![CDATA[$F{cantidad}]]&gt;&lt;/expression&gt;
+            &lt;/element&gt;
+        &lt;/band&gt;
+    &lt;/detail&gt;
+&lt;/jasperReport&gt;</code></pre>
+</div>
+
+<!-- 4. CÓDIGO JAVA PARA GENERAR Y VISUALIZAR EL REPORTE -->
+<h3 class="text-2xl font-bold text-emerald-300 mb-4 mt-10 flex items-center gap-2">
+    <i class="fa-solid fa-play text-emerald-400"></i> 4. Ejecución en Java: <code>EjemploJasper.java</code>
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Observa cómo en menos de 20 líneas de código consultamos la base de datos mediante <code>AdmonCafe</code>, transformamos la <code>LinkedList&lt;Cafe&gt;</code> en un <code>JRBeanCollectionDataSource</code>, rellenamos el reporte compilado <code>ReporteCafe.jasper</code> y lanzamos el visor:
+</p>
+
+<div class="code-wrapper relative pt-6 mb-6">
+    <div class="absolute top-0 left-0 bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-emerald-300 text-sm"></i> EjemploJasper/EjemploJasper.java
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">package EjemploJasper;
+
+import com.example.basedatos.ADMON.AdmonCafe;
+import com.example.basedatos.POJO.Cafe;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.view.JasperViewer;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+
+public class EjemploJasper {
+    public static void main(String[] args) {
+        try {
+            // 1. Obtener la lista de objetos desde la Base de Datos (MySQL o SQLite)
+            AdmonCafe admon = new AdmonCafe();
+            LinkedList<Cafe> cafes = admon.obtenerCafe();
+
+            for (Cafe cafe : cafes) {
+                System.out.println(cafe);
+            }
+
+            // 2. Envolver la LinkedList en un DataSource de JavaBeans para Jasper
+            JRBeanCollectionDataSource datos = new JRBeanCollectionDataSource(cafes);
+
+            // (Opcional) Mapa de parámetros para enviar valores a $P{anio}
+            Map<String, Object> parametros = new HashMap<>();
+            parametros.put("anio", "2026 - Cosecha Especial");
+
+            // 3. Llenar el reporte compilado (.jasper) con los parámetros (o null) y la colección
+            JasperPrint reporte = JasperFillManager.fillReport("ReporteCafe.jasper", parametros, datos);
+
+            // 4. Mostrar el visor interactivo.
+            // IMPORTANTE: el segundo parámetro "false" (isExitOnClose) evita que al cerrar
+            // la ventana del reporte se cierre toda tu aplicación JavaFX con System.exit(0).
+            JasperViewer vista = new JasperViewer(reporte, false);
+            vista.setVisible(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+</div>
+
+<div class="glass p-5 rounded-xl border-l-4 border-l-emerald-500 mb-6">
+    <h4 class="font-bold text-emerald-300 mb-1 flex items-center gap-2">
+        <i class="fa-solid fa-lightbulb text-yellow-400"></i> Tip: ¿Por qué pasar <code>false</code> en <code>new JasperViewer(reporte, false)</code>?
+    </h4>
+    <p class="text-xs text-slate-300 leading-relaxed">
+        Si usas el constructor de un solo argumento <code>new JasperViewer(reporte)</code>, cuando el usuario cierre la ventana del visor de PDF con la "X", JasperViewer ejecutará internamente <code>System.exit(0)</code> y <strong>matará toda tu ventana principal de JavaFX</strong>. Al pasar <code>false</code> como segundo argumento (<code>isExitOnClose = false</code>), solo se cierra la ventana del reporte y tu aplicación continúa activa.
+    </p>
+</div>

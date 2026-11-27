@@ -1,0 +1,230 @@
+<h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+    <span class="bg-indigo-500/20 text-indigo-400 p-2 rounded-lg text-xl"><i class="fa-solid fa-file-binary"></i></span>
+    Archivos Binarios & Serialización
+</h2>
+
+<p class="text-slate-300 mb-8 text-base leading-relaxed">
+    La serialización de objetos en Java representa una <strong>biyección computacional</strong>: mapea el estado estructurado de un objeto residente en la memoria RAM (sus grafos de referencias y datos primitivos) hacia una secuencia lineal de bytes en disco, y viceversa. A diferencia de los archivos de texto plano, los <strong>archivos binarios</strong> no son legibles por el ser humano, pero son <strong>extremadamente eficientes</strong> para la máquina, ya que omiten las sobrecargas de conversión de tipos (parsing) y de codificación de caracteres.
+</p>
+
+<!-- 1. LA ENTIDAD: SERIALIZABLE Y SERIALVERSIONUID -->
+<h3 class="text-2xl font-bold text-indigo-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-shield-halved text-indigo-400"></i> 1. La Entidad: Interfaz <code>Serializable</code> y <code>serialVersionUID</code>
+</h3>
+
+<div class="glass p-6 rounded-xl border-l-4 border-l-indigo-500 mb-6">
+    <h4 class="font-bold text-lg text-indigo-300 mb-2">Contrato de Persistencia</h4>
+    <p class="text-sm text-slate-300 leading-relaxed mb-4">
+        Para que la Máquina Virtual de Java (JVM) autorice la transformación de una clase a una ráfaga de bytes, la clase debe implementar la interfaz marcadora <code>java.io.Serializable</code>. Al ser una interfaz sin métodos, le indica al compilador que el estado de las instancias de esta clase puede ser volcado a disco de manera segura.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div class="bg-black/40 p-4 rounded-lg border border-white/10">
+            <span class="text-xs font-bold text-indigo-400 block mb-1"><i class="fa-solid fa-key mr-1"></i> serialVersionUID</span>
+            <p class="text-xs text-slate-300 leading-relaxed">
+                Actúa como una firma o <strong>hash de versión estructural</strong> de la clase. Si guardas un objeto hoy y mañana agregas un nuevo atributo, la JVM comparará los <code>serialVersionUID</code>. Si no coinciden, se lanzará una <code>InvalidClassException</code> para evitar corrupción de memoria.
+            </p>
+        </div>
+        <div class="bg-black/40 p-4 rounded-lg border border-white/10">
+            <span class="text-xs font-bold text-amber-400 block mb-1"><i class="fa-solid fa-eye-slash mr-1"></i> Modificador transient</span>
+            <p class="text-xs text-slate-300 leading-relaxed">
+                La palabra reservada <code>transient</code> excluye explícitamente un atributo del proceso de serialización. Al reconstruir el objeto desde disco, el valor de ese campo será <code>null</code> (o 0), ignorando lo que tenía antes de guardar.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-indigo-500/20 text-indigo-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-indigo-300 text-sm"></i> JugueteBinario.java
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">import java.io.Serializable;
+
+// 1. Declarar la interfaz marcadora Serializable
+public class JugueteBinario implements Serializable {
+    
+    // 2. Identificador de versión para control de cambios estructurales
+    private static final long serialVersionUID = 1L; 
+
+    private String codigo;
+    private String nombre;
+    private int edicion;
+    
+    // La palabra clave 'transient' excluye explícitamente esta variable de la serialización.
+    // Al deserializar, su valor volverá al valor por defecto de Java (null o 0).
+    private transient String datoTemporal; 
+
+    public JugueteBinario(String codigo, String nombre, int edicion) {
+        this.codigo = codigo;
+        this.nombre = nombre;
+        this.edicion = edicion;
+        this.datoTemporal = "No persistente en disco";
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Juguete [Código: %s, Nombre: %s, Edición: %d | Temp: %s]", 
+                             this.codigo, this.nombre, this.edicion, this.datoTemporal);
+    }
+}</code></pre>
+</div>
+
+<!-- 2. FLUJOS DE I/O BINARIOS Y TRY-WITH-RESOURCES -->
+<h3 class="text-2xl font-bold text-emerald-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-network-wired text-emerald-400"></i> 2. Flujos de I/O Binarios y Patrón Decorator
+</h3>
+
+<p class="text-slate-300 mb-4 text-sm leading-relaxed">
+    Al trabajar con datos binarios, sustituimos los lectores de texto (<code>FileWriter</code> / <code>FileReader</code>) por flujos de bytes puros: <code>FileOutputStream</code> y <code>FileInputStream</code>. Sobre ellos aplicamos el <strong>patrón Decorator</strong> envolviéndolos en <code>ObjectOutputStream</code> y <code>ObjectInputStream</code>.
+</p>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <div class="glass p-6 rounded-xl border-l-4 border-l-emerald-500">
+        <h4 class="font-bold text-emerald-400 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-file-export"></i> ObjectOutputStream
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed mb-3">
+            Recibe instancias de clases serializables y las convierte en una secuencia de bytes mediante <code>writeObject()</code>, canalizándolas directamente a un <code>FileOutputStream</code>.
+        </p>
+    </div>
+
+    <div class="glass p-6 rounded-xl border-l-4 border-l-blue-500">
+        <h4 class="font-bold text-blue-400 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-file-import"></i> ObjectInputStream
+        </h4>
+        <p class="text-xs text-slate-300 leading-relaxed mb-3">
+            Lee el flujo continuo de bytes de un <code>FileInputStream</code> y reconstruye el objeto original en la memoria Heap usando <code>readObject()</code>.
+        </p>
+    </div>
+</div>
+
+<!-- 3. GESTOR BINARIO Y EJEMPLO COMPLETO -->
+<h3 class="text-2xl font-bold text-purple-300 mb-4 mt-8 flex items-center gap-2">
+    <i class="fa-solid fa-laptop-code text-purple-400"></i> 3. Ejemplo Práctico: Serializar y Deserializar Colecciones
+</h3>
+
+<div class="code-wrapper relative pt-6 mb-8">
+    <div class="absolute top-0 left-0 bg-purple-500/20 text-purple-400 text-xs px-3 py-1.5 rounded-t-lg font-mono border-b border-white/10 w-full z-10 flex items-center gap-2">
+        <i class="fa-brands fa-java text-purple-300 text-sm"></i> GestorBinario.java
+    </div>
+    <button class="copy-btn mt-6 z-20" onclick="copyCode(this)"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+    <pre class="rounded-xl rounded-tl-none shadow-lg border border-white/10 m-0"><code class="language-java">import java.io.*;
+import java.util.LinkedList;
+
+public class GestorBinario {
+
+    // =====================================================================
+    // ESCRITURA: Serializando una Colección entera
+    // =====================================================================
+    public static void guardarClaseEntera(String ruta, LinkedList<JugueteBinario> lista) {
+        File archivo = new File(ruta);
+
+        // Try-with-resources: ObjectOutputStream envuelve a FileOutputStream
+        try (FileOutputStream fos = new FileOutputStream(archivo);
+             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+
+            // writeObject() toma cualquier objeto que implemente Serializable.
+            // Dado que LinkedList implementa Serializable y JugueteBinario también,
+            // podemos volcar la estructura de datos completa en una sola llamada de O(1).
+            oos.writeObject(lista);
+            
+            System.out.println("Estructura de datos serializada correctamente en: " + ruta);
+
+        } catch (IOException e) {
+            System.err.println("Error crítico de I/O al escribir archivo binario: " + e.getMessage());
+        }
+    }
+
+    // =====================================================================
+    // LECTURA: Deserializando y reconstruyendo la memoria
+    // =====================================================================
+    @SuppressWarnings("unchecked") // Suprimimos el warning del casteo genérico
+    public static LinkedList<JugueteBinario> leerClaseEntera(String ruta) {
+        LinkedList<JugueteBinario> listaReconstruida = new LinkedList<>();
+        File archivo = new File(ruta);
+
+        if (!archivo.exists()) return listaReconstruida;
+
+        try (FileInputStream fis = new FileInputStream(archivo);
+             ObjectInputStream ois = new ObjectInputStream(fis)) {
+
+            // readObject() retorna un tipo genérico 'Object'. 
+            // Debemos aplicar un casting explícito para mapearlo a nuestra estructura original.
+            Object objetoLeido = ois.readObject();
+            
+            if (objetoLeido instanceof LinkedList) {
+                listaReconstruida = (LinkedList<JugueteBinario>) objetoLeido;
+                System.out.println("Des-serialización exitosa. Objetos en memoria: " + listaReconstruida.size());
+            }
+
+        } catch (FileNotFoundException e) {
+            System.err.println("Archivo no localizado: " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Error de lectura binaria: " + e.getMessage());
+        } catch (ClassNotFoundException e) {
+            // Excepción exclusiva de binarios: ocurre si el archivo contiene una clase
+            // que ya no existe en el código fuente actual de la aplicación.
+            System.err.println("Incompatibilidad de clases en tiempo de ejecución: " + e.getMessage());
+        }
+
+        return listaReconstruida;
+    }
+
+    // =====================================================================
+    // MÉTODO MAIN DE PRUEBA
+    // =====================================================================
+    public static void main(String[] args) {
+        String archivoBinario = "juguetes.dat"; // Convención: .dat o .bin para binarios
+
+        // 1. Instanciamos objetos en RAM
+        LinkedList<JugueteBinario> inventario = new LinkedList<>();
+        inventario.add(new JugueteBinario("123", "Darth Vader Mafex", 1));
+        inventario.add(new JugueteBinario("456", "Yoda Mafex", 2));
+
+        // 2. Volcamos la memoria RAM al Disco (Persistencia Binaria)
+        guardarClaseEntera(archivoBinario, inventario);
+
+        // 3. Simulamos un reinicio del sistema limpiando la lista original
+        inventario = null;
+
+        // 4. Recuperamos el estado directamente desde el disco sin hacer parsing manual
+        LinkedList<JugueteBinario> inventarioRecuperado = leerClaseEntera(archivoBinario);
+
+        // Comprobación de integridad
+        for (JugueteBinario j : inventarioRecuperado) {
+            System.out.println(j.toString());
+        }
+    }
+}</code></pre>
+</div>
+
+<!-- 4. ANÁLISIS COMPARATIVO Y EOFEXCEPTION -->
+<div class="glass p-6 rounded-xl border border-amber-500/30 mb-8">
+    <h4 class="font-bold text-amber-300 mb-3 flex items-center gap-2 text-lg">
+        <i class="fa-solid fa-microchip text-amber-400"></i> Análisis Interno & Gestión de Excepciones
+    </h4>
+
+    <div class="space-y-4">
+        <div class="bg-black/40 p-4 rounded-lg border border-white/5">
+            <span class="text-xs font-bold text-indigo-400 block mb-1"><code>writeObject(Object obj)</code>:</span>
+            <p class="text-xs text-slate-300 leading-relaxed">
+                Ejecuta un análisis exhaustivo (reflexión) del objeto proporcionado. Si es una colección (como <code>LinkedList</code>), itera internamente sobre sus nodos y verifica que cada elemento también sea <code>Serializable</code>. Escribe secuencialmente la metainformación de la clase y los valores binarios de sus atributos.
+            </p>
+        </div>
+
+        <div class="bg-black/40 p-4 rounded-lg border border-white/5">
+            <span class="text-xs font-bold text-emerald-400 block mb-1"><code>readObject()</code>:</span>
+            <p class="text-xs text-slate-300 leading-relaxed">
+                Realiza el proceso inverso. Lee primero los metadatos de la clase desde el archivo binario, verifica el <code>serialVersionUID</code> contra la clase cargada en la JVM, reserva memoria en el Heap y asigna los valores bit a bit.
+            </p>
+        </div>
+
+        <div class="bg-black/40 p-4 rounded-lg border border-white/5">
+            <span class="text-xs font-bold text-amber-400 block mb-1">Gestión de <code>EOFException</code> (End Of File):</span>
+            <p class="text-xs text-slate-300 leading-relaxed">
+                Si guardas objetos de manera individual llamando a <code>oos.writeObject(juguete)</code> múltiples veces en lugar de guardar una colección completa, al leerlos deberás usar un bucle <code>while(true)</code> y capturar la excepción <code>EOFException</code> para salir del bucle. Los archivos binarios no poseen un delimitador o marcador "fin de línea" (como <code>null</code> en <code>readLine()</code>). Volcar la colección completa (<code>Collection</code>) elimina este problema y simplifica enormemente el código.
+            </p>
+        </div>
+    </div>
+</div>
