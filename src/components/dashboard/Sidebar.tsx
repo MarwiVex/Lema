@@ -194,7 +194,7 @@ function FolderTreeRow({
               </button>
             </div>
 
-            <div className="flex items-center gap-0.5 shrink-0 ml-1">
+            <div className="flex items-center gap-1 shrink-0 ml-1.5">
               <span
                 title={countTooltip}
                 className={`text-xs px-1.5 py-0.5 rounded-full ${
@@ -205,42 +205,44 @@ function FolderTreeRow({
               >
                 {node.totalItemCount}
               </span>
-              <button
-                type="button"
-                onClick={() => onStartAddSubfolder(node.id)}
-                aria-label={`Nueva subcarpeta en ${node.name}`}
-                className="text-ink-muted hover:text-cyan-600 dark:hover:text-cyan-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 transition-opacity p-1 rounded cursor-pointer"
-                title="Nueva subcarpeta"
-              >
-                <FolderPlus className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => onToggleMovePopover(isMoving ? null : node.id)}
-                aria-label={`Mover carpeta ${node.name}`}
-                className="text-ink-muted hover:text-cyan-600 dark:hover:text-cyan-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 transition-opacity p-1 rounded cursor-pointer"
-                title="Mover a otra carpeta"
-              >
-                <FolderInput className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => onStartEdit(node)}
-                aria-label={`Renombrar materia ${node.name}`}
-                className="text-ink-muted hover:text-cyan-600 dark:hover:text-cyan-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 transition-opacity p-1 rounded cursor-pointer"
-                title="Renombrar materia"
-              >
-                <Pencil className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => onDelete(node)}
-                aria-label={`Eliminar materia ${node.name}`}
-                className="text-ink-muted hover:text-red-500 dark:hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 transition-opacity p-1 rounded cursor-pointer"
-                title="Eliminar materia"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
+              <div className="flex items-center gap-0.5 md:w-0 md:overflow-hidden md:opacity-0 md:group-hover:w-auto md:group-hover:overflow-visible md:group-hover:opacity-100 md:group-focus-within:w-auto md:group-focus-within:overflow-visible md:group-focus-within:opacity-100 transition-opacity">
+                <button
+                  type="button"
+                  onClick={() => onStartAddSubfolder(node.id)}
+                  aria-label={`Nueva subcarpeta en ${node.name}`}
+                  className="text-ink-muted hover:text-cyan-600 dark:hover:text-cyan-400 p-1 rounded cursor-pointer"
+                  title="Nueva subcarpeta"
+                >
+                  <FolderPlus className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onToggleMovePopover(isMoving ? null : node.id)}
+                  aria-label={`Mover carpeta ${node.name}`}
+                  className="text-ink-muted hover:text-cyan-600 dark:hover:text-cyan-400 p-1 rounded cursor-pointer"
+                  title="Mover a otra carpeta"
+                >
+                  <FolderInput className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onStartEdit(node)}
+                  aria-label={`Renombrar materia ${node.name}`}
+                  className="text-ink-muted hover:text-cyan-600 dark:hover:text-cyan-400 p-1 rounded cursor-pointer"
+                  title="Renombrar materia"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onDelete(node)}
+                  aria-label={`Eliminar materia ${node.name}`}
+                  className="text-ink-muted hover:text-red-500 dark:hover:text-red-400 p-1 rounded cursor-pointer"
+                  title="Eliminar materia"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </>
         )}
